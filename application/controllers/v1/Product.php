@@ -38,10 +38,22 @@ class Product extends REST_Controller
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
+	public function productList_post()
+	{
+		$products = $this->product->get_ProductList($this->post());
+		$response = array('number' => count($products), 'products' => $products, 'recordsFiltered' => 0, 'recordsTotal' => count($products),  'totalPages' => 1);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
 	public function productDetail_post()
 	{
-		$products = $this->product->get_ProductDetail($this->post());
-		$response = array('number' => count($products), 'products' => $products, 'recordsFiltered' => 0, 'recordsTotal' => count($products),  'totalPages' => 1);
+		$response = $this->product->get_ProductDetail($this->post());
+		$this->response($response[0], REST_Controller::HTTP_OK);
+	}
+
+	public function productReview_post()
+	{
+		$response = $this->product->get_ProductReview($this->post());
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 }

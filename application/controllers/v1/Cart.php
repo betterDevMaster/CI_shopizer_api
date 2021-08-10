@@ -25,9 +25,9 @@ class Cart extends REST_Controller
 		$this->methods['users_delete']['limit'] = 50; // 50 requests per hour per user/key
 	}
 
-	public function default_get()
+	public function newCart_post()
 	{
-		$response = $this->store->get_Default();
+		$response = $this->cart->get_NewCart($this->post());
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 }

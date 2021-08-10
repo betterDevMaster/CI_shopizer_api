@@ -16,32 +16,39 @@ class Product_model extends CI_Model
 	public $tblProperty = 'tbl_property';
 	public $tblPropertyValue = 'tbl_property_value';
 	public $tblType = 'tbl_type';
+	public $tblReview = 'tbl_review';
+	public $tblUserBilling = 'tbl_user_billing';
+	public $tblUserDelivery = 'tbl_user_delivery';
 
 	public function __construct()
 	{
 		parent::__construct();
 	}
 
-	function get_FeaturedItem($store, $lang, $category = null, $manufacturer = '')
+	function get_FeaturedItem($store, $lang, $category = null, $manufacturer = '', $productId = null)
 	{
-		if (!$category)
-			$products = $this->db->select('*')->get($this->tblProducts)->result_array();
-		else {
-			if ($this->IsNullOrEmptyString($manufacturer)) {
-				$manufacturers = $this->db->select('id')->get($this->tblManufacturer)->result_array();
-				foreach ($manufacturers as $k0 => $v0) {
-					$manuId = $v0['id'];
-					$this->db->or_where("manufacturer LIKE '%$manuId%'");
+		if (!$productId) {
+			if (!$category)
+				$products = $this->db->select('*')->get($this->tblProducts)->result_array();
+			else {
+				if ($this->IsNullOrEmptyString($manufacturer)) {
+					$manufacturers = $this->db->select('id')->get($this->tblManufacturer)->result_array();
+					foreach ($manufacturers as $k0 => $v0) {
+						$manuId = $v0['id'];
+						$this->db->or_where("manufacturer LIKE '%$manuId%'");
+					}
+				} else {
+					$manufacturerList = explode(',', $manufacturer);
+					foreach ($manufacturerList as $k => $v) {
+						if (!$v) continue;
+						$this->db->or_where("manufacturer LIKE '%$v%'");
+					}
 				}
-			} else {
-				$manufacturerList = explode(',', $manufacturer);
-				foreach ($manufacturerList as $k => $v) {
-					if (!$v) continue;
-					$this->db->or_where("manufacturer LIKE '%$v%'");
-				}
+				$this->db->where("categories LIKE '%$category%'");
+				$products = $this->db->get($this->tblProducts)->result_array();
 			}
-			$this->db->where("categories LIKE '%$category%'");
-			$products = $this->db->get($this->tblProducts)->result_array();
+		} else {
+			$products = $this->db->select('*')->get_where($this->tblProducts, array('id' => $productId))->result_array();
 		}
 
 		foreach ($products as $k1 => $v1) {
@@ -131,11 +138,28 @@ class Product_model extends CI_Model
 		return $products;
 	}
 
-	function get_ProductDetail($pData)
+	function get_ProductList($pData)
 	{
 		$manufacturer = $this->IsNullOrEmptyString($pData['manufacturer']) ? '' : $pData['manufacturer'] . ',';
 		$product = $this->get_FeaturedItem($pData['store'], $pData['lang'], $pData['category'] . ',', $manufacturer);
 		return $product;
+	}
+
+	function get_ProductDetail($pData)
+	{
+		$product = $this->get_FeaturedItem($pData['store'], $pData['lang'], null, '', $pData['id']);
+		return $product;
+	}
+
+	function get_ProductReview($pData)
+	{
+		$reviews = $this->db->select('*')->get_where($this->tblReview, array('productId' => $pData['productId']))->result_array();
+		foreach ($reviews as $k => $v) {
+			$reviews[$k]['customer'] = $this->db->select('*')->get_where($this->tblProperties, array('id' => $pData['userId']))->row_array();
+			$reviews[$k]['customer']['billing'] = $this->db->select('*')->get_where($this->tblUserBilling, array('userId' => $pData['userId']))->row_array();
+			$reviews[$k]['customer']['delivery'] = $this->db->select('*')->get_where($this->tblUserDelivery, array('userId' => $pData['userId']))->row_array();
+		}
+		return $reviews;
 	}
 
 	function IsNullOrEmptyString($str)
