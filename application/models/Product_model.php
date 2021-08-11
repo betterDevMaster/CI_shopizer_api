@@ -31,7 +31,7 @@ class Product_model extends CI_Model
 			if (!$category)
 				$products = $this->db->select('*')->get($this->tblProducts)->result_array();
 			else {
-				if ($this->IsNullOrEmptyString($manufacturer)) {
+				if (IsNullOrEmptyString($manufacturer)) {
 					$manufacturers = $this->db->select('id')->get($this->tblManufacturer)->result_array();
 					foreach ($manufacturers as $k0 => $v0) {
 						$manuId = $v0['id'];
@@ -140,7 +140,7 @@ class Product_model extends CI_Model
 
 	function get_ProductList($pData)
 	{
-		$manufacturer = $this->IsNullOrEmptyString($pData['manufacturer']) ? '' : $pData['manufacturer'] . ',';
+		$manufacturer = IsNullOrEmptyString($pData['manufacturer']) ? '' : $pData['manufacturer'] . ',';
 		$product = $this->get_FeaturedItem($pData['store'], $pData['lang'], $pData['category'] . ',', $manufacturer);
 		return $product;
 	}
@@ -160,10 +160,5 @@ class Product_model extends CI_Model
 			$reviews[$k]['customer']['delivery'] = $this->db->select('*')->get_where($this->tblUserDelivery, array('userId' => $pData['userId']))->row_array();
 		}
 		return $reviews;
-	}
-
-	function IsNullOrEmptyString($str)
-	{
-		return (!isset($str) || trim($str) === '');
 	}
 } // END

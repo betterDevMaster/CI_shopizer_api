@@ -7,6 +7,7 @@ class User_model extends CI_Model
     public $tblZone = 'tbl_zone';
     public $tblUserBilling = 'tbl_user_billing';
     public $tblUserDelivery = 'tbl_user_delivery';
+    public $tblConfig = 'tbl_config';
 	
 	public function __construct()
 	{
@@ -163,5 +164,11 @@ class User_model extends CI_Model
 			$this->db->insert($table, $pData);
 			return false;
 		}
+	}
+
+	function get_Config()
+	{
+		$config = $this->db->select('*')->get($this->tblConfig)->row_array();
+		return $config;
 	}
 } // END

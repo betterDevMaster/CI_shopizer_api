@@ -25,9 +25,49 @@ class Cart extends REST_Controller
 		$this->methods['users_delete']['limit'] = 50; // 50 requests per hour per user/key
 	}
 
-	public function newCart_post()
+	public function addCart_post()
 	{
-		$response = $this->cart->get_NewCart($this->post());
+		$response = $this->cart->get_AddCart($this->post());
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function getUserCart_get()
+	{
+		$response = $this->cart->get_UserCart($_REQUEST['code'], $_REQUEST['lang'], $_REQUEST['store']);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function promo_post()
+	{
+		$response = $this->cart->get_UserPromoCart($this->post());
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function updateCart_post()
+	{
+		$response = $this->cart->get_updateCart($this->post());
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function deleteCart_delete()
+	{
+		$response = $this->cart->get_DeleteCart($_REQUEST['code'], $_REQUEST['productId'], $_REQUEST['store']);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function shipping_post()
+	{
+		$response = $this->cart->get_Shipping($this->post());
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function total_get()
+	{
+		$quote = null;
+		if (isset($_REQUEST['quote'])) {
+			$quote = $_REQUEST['quote'];
+		}
+		$response = $this->cart->get_Total($_REQUEST['code'], $quote);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 }

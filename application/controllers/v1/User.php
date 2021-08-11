@@ -53,7 +53,7 @@ class User extends REST_Controller
 	public function register_post()
 	{
 		$user_id = $this->user->add_NewUser($this->post());
-		$response = array('id' => $user_id, 'token' => unique_token());
+		$response = array('id' => $user_id, 'token' => md5($user_id));
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
@@ -67,7 +67,7 @@ class User extends REST_Controller
 		$user_id = $this->user->check_Auth($data);
 
 		if ($user_id) {
-			$response = array('id' => $user_id, 'token' => unique_token());
+			$response = array('id' => $user_id, 'token' => md5($user_id));
 			$this->response($response, REST_Controller::HTTP_OK);
 
 			// if ($user['status']) {
@@ -138,6 +138,12 @@ class User extends REST_Controller
 	function updateUserBillingDelivery($data, $table)
 	{
 		$ret =	$this->user->updateBillingDelivery_User($data, $table);
+		$this->response($ret, REST_Controller::HTTP_OK);
+	}
+
+	function config_get()
+	{
+		$ret =	$this->user->get_Config();
 		$this->response($ret, REST_Controller::HTTP_OK);
 	}
 }
