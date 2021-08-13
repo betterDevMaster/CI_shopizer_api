@@ -9,7 +9,7 @@ require APPPATH . 'libraries/Format.php';
 require APPPATH . 'helpers/authorization_helper.php';
 require APPPATH . 'helpers/jwt_helper.php';
 
-class User extends REST_Controller
+class Customer extends REST_Controller
 {
 	public function __construct()
 	{
@@ -18,7 +18,7 @@ class User extends REST_Controller
 
 		// Configure limits on our controller methods
 		// Ensure you have created the 'limits' table and enabled 'limits' within application/config/rest.php
-		$this->load->model('user_model', 'user');
+		$this->load->model('customer_model', 'customer');
 		$this->baseUrl = base_url();
 		$this->methods['users_get']['limit'] = 500; // 500 requests per hour per user/key
 		$this->methods['users_post']['limit'] = 100; // 100 requests per hour per user/key
@@ -40,47 +40,47 @@ class User extends REST_Controller
 
 	public function country_get()
 	{
-		$response = $this->user->get_CountryZonesList($_REQUEST['lang']);
+		$response = $this->customer->get_CountryZonesList($_REQUEST['lang']);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
 	public function zone_get()
 	{
-		$response = $this->user->get_ZonesList($_REQUEST['code']);
+		$response = $this->customer->get_ZonesList($_REQUEST['code']);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
 	public function register_post()
 	{
-		$user_id = $this->user->add_NewUser($this->post());
-		$response = array('id' => $user_id, 'token' => md5($user_id));
+		$customer_id = $this->customer->add_NewUser($this->post());
+		$response = array('id' => $customer_id, 'token' => md5($customer_id));
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
 	public function login_post()
 	{
-		// Check if any user exists with the given credentials
+		// Check if any customer exists with the given credentials
 		$data = array(
 			'userName' => $this->post('userName'),
 			'password' => md5($this->post('password')),
 		);
-		$user_id = $this->user->check_Auth($data);
+		$customer_id = $this->customer->check_Auth($data);
 
-		if ($user_id) {
-			$response = array('id' => $user_id, 'token' => md5($user_id));
+		if ($customer_id) {
+			$response = array('id' => $customer_id, 'token' => md5($customer_id));
 			$this->response($response, REST_Controller::HTTP_OK);
 
-			// if ($user['status']) {
+			// if ($customer['status']) {
 			// 	$response = array(
 			// 		'status' => true,
 			// 		'message' => 'User login successful',
-			// 		'meta' => $user['message'],
+			// 		'meta' => $customer['message'],
 			// 	);
 			// 	$this->response($response, REST_Controller::HTTP_OK);
 			// } else {
 			// 	$response = array(
 			// 		'status' => false,
-			// 		'message' => $user['message'],
+			// 		'message' => $customer['message'],
 			// 		'meta' => array(),
 			// 	);
 			// 	$this->response($response, REST_Controller::HTTP_OK);
@@ -96,7 +96,7 @@ class User extends REST_Controller
 
 	public function profile_get()
 	{
-		$response = $this->user->get_UserProfile($_REQUEST['id']);
+		$response = $this->customer->get_UserProfile($_REQUEST['id']);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
@@ -106,19 +106,19 @@ class User extends REST_Controller
 			'userName' => $this->post('userName'),
 			'emailAddress' => $this->post('emailAddress'),
 		);
-		$this->user->update_User($data, $this->post('emailAddress'));
+		$this->customer->update_User($data, $this->post('emailAddress'));
 		$this->response($data, REST_Controller::HTTP_OK);
 	}
 
 	public function deleteUser_delete()
 	{
-		$this->user->delete_User($_REQUEST['id']);
+		$this->customer->delete_User($_REQUEST['id']);
 		$this->response($_REQUEST['id'], REST_Controller::HTTP_OK);
 	}
 
 	public function updatePassword_post()
 	{
-		$ret = $this->user->update_UserPassword($this->post());
+		$ret = $this->customer->update_UserPassword($this->post());
 		if ($ret)
 			$this->response($ret, REST_Controller::HTTP_OK);
 		else
@@ -137,13 +137,13 @@ class User extends REST_Controller
 
 	function updateUserBillingDelivery($data, $table)
 	{
-		$ret =	$this->user->updateBillingDelivery_User($data, $table);
+		$ret =	$this->customer->updateBillingDelivery_User($data, $table);
 		$this->response($ret, REST_Controller::HTTP_OK);
 	}
 
 	function config_get()
 	{
-		$ret =	$this->user->get_Config();
+		$ret =	$this->customer->get_Config();
 		$this->response($ret, REST_Controller::HTTP_OK);
 	}
 }
