@@ -5,6 +5,10 @@ class Admin_model extends CI_Model
 	public $tblUser = 'tbl_user';
 	public $tblLang = 'tbl_lang';
 	public $tblGroups = 'tbl_groups';
+	public $tblPermissions = 'tbl_permissions';
+	public $tblCurrency = 'tbl_currency';
+	public $tblMeasures = 'tbl_measures';
+	public $tblWeights = 'tbl_weights';
 
 	public function __construct()
 	{
@@ -23,18 +27,6 @@ class Admin_model extends CI_Model
 			return $query->row_array()['id'];
 		else
 			return null;
-	}
-
-	function get_Languages()
-	{
-		$lang = $this->db->select('*')->get($this->tblLang)->result_array();
-		return $lang;
-	}
-
-	function get_Groups()
-	{
-		$lang = $this->db->select('*')->get($this->tblGroups)->result_array();
-		return $lang;
 	}
 
 	function update_UserPassword($pData)
@@ -60,13 +52,13 @@ class Admin_model extends CI_Model
 
 		if ($q->num_rows() > 0) {
 			$data = array(
-				'active'=> $pData['active'],
-				'defaultLanguage'=> $pData['defaultLanguage'],
-				'emailAddress'=> $pData['emailAddress'],
-				'firstName'=> $pData['firstName'],
-				'lastName'=> $pData['lastName'],
-				'merchant'=> $pData['store'],
-				'userName'=> $pData['userName'],
+				'active' => $pData['active'],
+				'defaultLanguage' => $pData['defaultLanguage'],
+				'emailAddress' => $pData['emailAddress'],
+				'firstName' => $pData['firstName'],
+				'lastName' => $pData['lastName'],
+				'merchant' => $pData['store'],
+				'userName' => $pData['userName'],
 			);
 			$this->db->where($where);
 			$this->db->update($this->tblUser, $data);
@@ -74,5 +66,41 @@ class Admin_model extends CI_Model
 		} else {
 			return null;
 		}
+	}
+
+	function get_UniqueUser($pData)
+	{
+		$where = array('merchant' => $pData['merchant'], 'emailAddress' => $pData['unique']);
+		$this->db->where($where);
+		$q = $this->db->get($this->tblUser);
+
+		if ($q->num_rows() > 0)
+			return true;
+		else
+			return false;
+	}
+
+	function createUser($pData)
+	{
+		$groups = '';
+		foreach ($pData['groups'] as $k => $v) {
+			$groups = $groups.$v['id'] . ',';
+		}
+
+		$permissions = '';
+		$perArr = $this->db->select('*')->get($this->tblPermissions)->result_array();
+		foreach ($perArr as $k1 => $v1) {
+			$permissions = $permissions. $v1['id'] . ',';
+		}
+
+		$pData['groups'] = $groups;
+		$pData['permissions'] = $permissions;
+		$pData['merchant'] = $pData['store'];
+		$pData['password'] = md5($pData['password']);
+        unset($pData['store']);
+        unset($pData['repeatPassword']);
+
+		$this->db->insert($this->tblUser, $pData);
+		return $this->db->insert_id();
 	}
 } // END

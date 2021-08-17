@@ -11,6 +11,10 @@ require APPPATH . 'helpers/jwt_helper.php';
 
 class Customer extends REST_Controller
 {
+	public $tblDelivery = 'tbl_user_delivery';
+	public $tblBilling = 'tbl_user_billing';
+	public $tblConfig = 'tbl_config';
+
 	public function __construct()
 	{
 		// Construct the parent class
@@ -19,6 +23,7 @@ class Customer extends REST_Controller
 		// Configure limits on our controller methods
 		// Ensure you have created the 'limits' table and enabled 'limits' within application/config/rest.php
 		$this->load->model('customer_model', 'customer');
+		$this->load->model('common_model', 'common');
 		$this->baseUrl = base_url();
 		$this->methods['users_get']['limit'] = 500; // 500 requests per hour per user/key
 		$this->methods['users_post']['limit'] = 100; // 100 requests per hour per user/key
@@ -40,7 +45,10 @@ class Customer extends REST_Controller
 
 	public function country_get()
 	{
-		$response = $this->customer->get_CountryZonesList($_REQUEST['lang']);
+		$lang = null;
+		if (isset($_REQUEST['lang']))
+			$lang = $_REQUEST['lang'];
+		$response = $this->customer->get_CountryZonesList($lang);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
@@ -118,32 +126,32 @@ class Customer extends REST_Controller
 
 	public function updatePassword_post()
 	{
-		$ret = $this->customer->update_UserPassword($this->post());
-		if ($ret)
-			$this->response($ret, REST_Controller::HTTP_OK);
+		$response = $this->customer->update_UserPassword($this->post());
+		if ($response)
+			$this->response($response, REST_Controller::HTTP_OK);
 		else
-			$this->response($ret, REST_Controller::HTTP_NOT_FOUND);
+			$this->response($response, REST_Controller::HTTP_NOT_FOUND);
 	}
 
 	public function updateBilling_post()
 	{
-		$this->updateUserBillingDelivery($this->post(), 'tbl_user_billing');
+		$this->updateUserBillingDelivery($this->post(), $this->tblBilling);
 	}
 
 	public function updateDelivery_post()
 	{
-		$this->updateUserBillingDelivery($this->post(), 'tbl_user_delivery');
+		$this->updateUserBillingDelivery($this->post(), $this->tblDelivery);
 	}
 
 	function updateUserBillingDelivery($data, $table)
 	{
-		$ret =	$this->customer->updateBillingDelivery_User($data, $table);
-		$this->response($ret, REST_Controller::HTTP_OK);
+		$response =	$this->customer->updateBillingDelivery_User($data, $table);
+		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
 	function config_get()
 	{
-		$ret =	$this->customer->get_Config();
-		$this->response($ret, REST_Controller::HTTP_OK);
+		$response  = $this->common->get_TableContentWithRowResult($this->tblConfig);
+		$this->response($response, REST_Controller::HTTP_OK);
 	}
 }

@@ -10,12 +10,18 @@ if (!function_exists('GetTableDetails')) {
 	function GetTableDetails($_this, $table, $where, $splitStr, $splitedArr = array())
 	{
 		$groups = explode(',', $splitStr);
-		$user['groups'] = array();
-		foreach ($groups as $k => $v) {
+		foreach ($groups as $v) {
 			if (!$v) continue;
 			$group = $_this->db->select('*')->get_where($table, array($where => $v))->row_array();
 			array_push($splitedArr, $group);
 		}
 		return $splitedArr;
+	}
+}
+
+if (!function_exists('SetTableIDsToString')) {
+	function SetTableIDsToString($ids)
+	{
+		// supportedLanguages
 	}
 }

@@ -15,9 +15,19 @@ class Category_model extends CI_Model
 		parent::__construct();
 	}
 
-	function get_CategoryDetail($id, $store, $lang)
+	function get_CategoryDetail($id, $store, $lang, $count = null, $page = null, $filter = null, $code = null)
 	{
-		$category = $this->db->select('*')->get_where($this->tblCategories, array('id' => $id))->result_array();
+		if (!$filter)
+			$category = $this->db->select('*')->get_where($this->tblCategories, array('id' => $id))->result_array();
+		else {
+			if (!$code)
+				$category = $this->db->select('*')->get($this->tblCategories)->result_array();
+			else {
+				$this->db->where("code LIKE '%$code%'");
+				$category = $this->db->get($this->tblCategories)->result_array();
+			}
+		}
+
 		for ($i = 0; $i < count($category); $i++) {
 			$category[$i]['description'] = $this->db->select('*')->get_where($this->tblDescription, array('id' => $category[$i]['description']))->row_array();
 			$category[$i]['parent'] = $this->db->select('id, code')->get_where($this->tblCategories, array('id' => $category[$i]['parent']))->row_array();
@@ -52,5 +62,104 @@ class Category_model extends CI_Model
 			}
 		}
 		return $options;
+	}
+
+	function updateCategory($pData)
+	{
+		if (count($pData['descriptions']) > 0) {
+			$insertData = array(
+				'description' => $pData['descriptions'][0]['description'],
+				'friendlyUrl' => $pData['descriptions'][0]['friendlyUrl'],
+				'highlights' => $pData['descriptions'][0]['highlights'],
+				'language' => $pData['descriptions'][0]['language'],
+				'metaDescription' => $pData['descriptions'][0]['metaDescription'],
+				'name' => $pData['descriptions'][0]['name'],
+				'title' => $pData['descriptions'][0]['title'],
+			);
+
+			$this->db->insert($this->tblDescription, $insertData);
+			$insertId = $this->db->insert_id();
+		}
+
+		$where = array('id' => $pData['id']);
+		$data = array(
+			'code' => $pData['code'],
+			'description' => $insertId,
+			'parent' => $pData['parent']['id'],
+			'sortOrder' => $pData['sortOrder'],
+			'store' => $pData['store'],
+			'visible' => $pData['visible'],
+		);
+		$this->db->where($where)->update($this->tblCategories, $data);
+		return $pData;
+	}
+
+	function addCategory($pData)
+	{
+		if (count($pData['descriptions']) > 0) {
+			$insertData = array(
+				'description' => $pData['descriptions'][0]['description'],
+				'friendlyUrl' => $pData['descriptions'][0]['friendlyUrl'],
+				'highlights' => $pData['descriptions'][0]['highlights'],
+				'language' => $pData['descriptions'][0]['language'],
+				'metaDescription' => $pData['descriptions'][0]['metaDescription'],
+				'name' => $pData['descriptions'][0]['name'],
+				'title' => $pData['descriptions'][0]['title'],
+			);
+
+			$this->db->insert($this->tblDescription, $insertData);
+			$insertId = $this->db->insert_id();
+		}
+
+		$data = array(
+			'code' => $pData['code'],
+			'description' => $insertId,
+			'parent' => $pData['parent']['id'],
+			'sortOrder' => $pData['sortOrder'],
+			'store' => isset($pData['store']) ? $pData['store'] : 'DEFAULT',
+			'visible' => $pData['visible'],
+			'depth' => isset($pData['depth']) ? $pData['depth'] : 0,
+			'featured' => isset($pData['featured']) ? $pData['featured'] : false,
+		);
+		$this->db->insert($this->tblCategories, $data);
+		return $pData;
+	}
+
+	function visible($pData)
+	{
+		$where = array('id' => $pData['id']);
+		$data = array(
+			'visible' => $pData['visible'],
+		);
+		$this->db->where($where)->update($this->tblCategories, $data);
+		return $pData;
+	}
+
+	function deleteCategory($id)
+	{
+		$this->db->where('id', $id);
+		$this->db->delete($this->tblCategories);
+		return true;
+	}
+
+	function uniqueCategory($code)
+	{
+		$q = $this->db->get_where($this->tblCategories, array('code' => $code));
+		if ($q->num_rows() > 0)
+			return true;
+		else
+			return false;
+	}
+
+	function moveCategory($pData)
+	{
+		$where = array('id' => $pData['childId']);
+		$data = array(
+			'parent' => $pData['parentId'] == '-1' ? null : $pData['parentId'],
+		);
+		var_dump($where);
+		var_dump($data);
+		$this->db->where($where)->update($this->tblCategories, $data);
+		return true;
 	}
 } // END

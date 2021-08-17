@@ -25,15 +25,21 @@ class Store extends REST_Controller
 		$this->methods['users_delete']['limit'] = 50; // 50 requests per hour per user/key
 	}
 
-	public function default_get($store = 'DEFAULT', $names = false)
+	public function default_get($store = 'DEFAULT', $names = false, $list = false)
 	{
-		$response = $this->store->get_Default($store, $names);
+		$response = $this->store->get_Default($store, $names, $list);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
 	public function names_get()
 	{
-		$response = $this->default_get($_REQUEST['store'], true);
+		$response = $this->default_get($_REQUEST['store'], true, false);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function update_Store($pData)
+	{
+		$response = $this->default_get($_REQUEST['store'], true, false);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 }

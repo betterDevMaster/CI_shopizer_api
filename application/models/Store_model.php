@@ -13,15 +13,18 @@ class Store_model extends CI_Model
 		parent::__construct();
 	}
 
-	function get_Default($store, $names)
+	function get_Default($store, $names, $list)
 	{
-		if (!$names)
-			$default = $this->db->select('*')->get_where($this->tblDefault, array('code' => $store))->row_array();
-		else
-			$default = $this->db->select('*')->get_where($this->tblDefault, array('code' => $store))->result_array();
+		if (!$list) {
+			if (!$names)
+				$default = $this->db->select('*')->get_where($this->tblDefault, array('code' => $store))->row_array();
+			else
+				$default = $this->db->select('*')->get($this->tblDefault)->result_array();
+		} else
+			$default = $this->db->select('*')->get($this->tblDefault)->result_array();
 
 		if ($default) {
-			if (count($default) > 1) {
+			if (array_key_exists('id', $default)) {
 				$default = $this->defaultDetail($default['address'], $default['logo'], $default);
 			} else {
 				foreach ($default as $k => $v) {
@@ -37,10 +40,77 @@ class Store_model extends CI_Model
 	{
 		$deliveryAddress = $this->db->get_where($this->tblUserDelivery, array('id' => $defAddress))->row_array();
 		$logo = $this->db->get_where($this->tblLogo, array('id' => $defLogo))->row_array();
-		$supportedLanguages = $this->db->select('*')->get($this->tblSupportedLanguages)->result_array();
 		$default['address'] = $deliveryAddress;
 		$default['logo'] = $logo;
-		$default['supportedLanguages'] = $supportedLanguages;
+		$default['supportedLanguages'] = GetTableDetails($this, $this->tblSupportedLanguages, 'id', $default['supportedLanguages']);
 		return $default;
+	}
+
+	function update_Store($pData, $update = true)
+	{
+		// Update Delivery address table
+		$delivery = array(
+			'address' => $pData['address']['address'], 'city' => $pData['address']['city'],
+			'country' => $pData['address']['country'], 'postalCode' => $pData['address']['postalCode'],
+			'stateProvince' => $pData['address']['stateProvince']
+		);
+
+		if ($update)
+			$this->db->where(array('id' => $pData['addressId']))->update($this->tblUserDelivery, $delivery);
+		else {
+			$delivery['userId'] = $pData['userId'];
+			$this->db->insert($this->tblUserDelivery, $delivery);
+			$deliveryId = $this->db->insert_id();
+		}
+
+		// Update Default table
+		$default = array(
+			'currency' => $pData['currency'], 'currencyFormatNational' => $pData['currencyFormatNational'],
+			'defaultLanguage' => $pData['defaultLanguage'], 'dimension' => $pData['dimension'],
+			'email' => $pData['email'], 'inBusinessSince' => $pData['inBusinessSince'],
+			'name' => $pData['name'], 'phone' => $pData['phone'],
+			'retailer' => $pData['retailer'], 'useCache' => $pData['useCache'],
+			'weight' => $pData['weight'], 'code' => $pData['code']
+		);
+
+		$supportedLanguages = $this->db->select('*')->get($this->tblSupportedLanguages)->result_array();
+		$supportedLanguageStr = '';
+		foreach ($supportedLanguages as $k1 => $v1) {
+			foreach ($pData['supportedLanguages'] as $k2 => $v2) {
+				if ($v1['code'] == $v2) {
+					$supportedLanguageStr = $supportedLanguageStr . $v1['id'] . ',';
+					continue;
+				}
+			}
+		}
+		$default['supportedLanguages'] = $supportedLanguageStr;
+
+		if ($update)
+			$this->db->where(array('code' => $pData['code']))->update($this->tblDefault, $default);
+		else {
+			$default['address'] = $deliveryId;
+			$this->db->insert($this->tblDefault, $default);
+		}
+
+		return true;
+	}
+
+	function delete_Store($store)
+	{
+		$this->db->where('code', $store);
+		$this->db->delete($this->tblDefault);
+		return true;
+	}
+
+	function unique_Store($store)
+	{
+		$where = array('code' => $store);
+		$this->db->where($where);
+		$q = $this->db->get($this->tblDefault);
+
+		if ($q->num_rows() > 0)
+			return true;
+		else
+			return false;
 	}
 } // END
