@@ -11,6 +11,7 @@ require APPPATH . 'helpers/jwt_helper.php';
 
 class Customer extends REST_Controller
 {
+	public $tblUser = 'tbl_user';
 	public $tblDelivery = 'tbl_user_delivery';
 	public $tblBilling = 'tbl_user_billing';
 	public $tblConfig = 'tbl_config';
@@ -24,10 +25,6 @@ class Customer extends REST_Controller
 		// Ensure you have created the 'limits' table and enabled 'limits' within application/config/rest.php
 		$this->load->model('customer_model', 'customer');
 		$this->load->model('common_model', 'common');
-		$this->baseUrl = base_url();
-		$this->methods['users_get']['limit'] = 500; // 500 requests per hour per user/key
-		$this->methods['users_post']['limit'] = 100; // 100 requests per hour per user/key
-		$this->methods['users_delete']['limit'] = 50; // 50 requests per hour per user/key
 	}
 
 	public function ping_get()
@@ -120,8 +117,8 @@ class Customer extends REST_Controller
 
 	public function deleteUser_delete()
 	{
-		$this->customer->delete_User($_REQUEST['id']);
-		$this->response($_REQUEST['id'], REST_Controller::HTTP_OK);
+		$response =	$this->common->delete_TableRecord($_REQUEST['id'], $this->tblUser);
+		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
 	public function updatePassword_post()

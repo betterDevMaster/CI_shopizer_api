@@ -73,8 +73,8 @@ class User extends REST_Controller
 
 	public function deleteUser_delete()
 	{
-		$this->customer->delete_User($_REQUEST['userId']);
-		$this->response($_REQUEST['userId'], REST_Controller::HTTP_OK);
+		$response =	$this->common->delete_TableRecord($_REQUEST['userId'], $this->tblUser);
+		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
 	public function updateUser_post()
@@ -88,8 +88,9 @@ class User extends REST_Controller
 
 	public function unique_post()
 	{
-		$response = $this->admin->get_UniqueUser($this->post());
-		$this->response(array('exists' => $response), REST_Controller::HTTP_OK);
+		$where = array('merchant' => $this->post('merchant'), 'emailAddress' => $this->post('unique'));
+		$response = $this->common->get_UniqueTableRecord($where, $this->tblUser);
+		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
 	public function createUser_post()

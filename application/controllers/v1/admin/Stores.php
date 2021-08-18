@@ -11,6 +11,8 @@ require APPPATH . 'helpers/jwt_helper.php';
 
 class Stores extends REST_Controller
 {
+	public $tblStore = 'tbl_store';
+
 	public function __construct()
 	{
 		// Construct the parent class
@@ -18,14 +20,12 @@ class Stores extends REST_Controller
 
 		// Configure limits on our controller methods
 		// Ensure you have created the 'limits' table and enabled 'limits' within application/config/rest.php
-		$this->load->model('admin_model', 'admin');
-		$this->load->model('customer_model', 'customer');
+		$this->load->model('common_model', 'common');
 		$this->load->model('store_model', 'store');
 	}
 
 	public function list_get()
 	{
-		// $stores = $this->admin->get_StoreList($_REQUEST['start']);
 		$stores = $this->store->get_Default('DEFAULT', false, true);
 		$response = array('data' => $stores, 'number' => 10, 'recordsFiltered' => 10, 'recordsTotal' => count($stores), 'totalPages' => 1);
 		$this->response($response, REST_Controller::HTTP_OK);
@@ -39,14 +39,15 @@ class Stores extends REST_Controller
 
 	public function deleteStore_delete()
 	{
-		$response =	$this->store->delete_Store($_REQUEST['store']);
+		$response =	$this->common->delete_TableRecord($_REQUEST['store'], $this->tblStore);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
 	public function unique_get()
 	{
-		$response =	$this->store->unique_Store($_REQUEST['code']);
-		$this->response(array('exists' => $response), REST_Controller::HTTP_OK);
+		$where = array('code' => $_REQUEST['code']);
+		$response = $this->common->get_UniqueTableRecord($where, $this->tblStore);
+		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
 	public function createStore_post()

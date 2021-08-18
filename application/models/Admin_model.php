@@ -68,18 +68,6 @@ class Admin_model extends CI_Model
 		}
 	}
 
-	function get_UniqueUser($pData)
-	{
-		$where = array('merchant' => $pData['merchant'], 'emailAddress' => $pData['unique']);
-		$this->db->where($where);
-		$q = $this->db->get($this->tblUser);
-
-		if ($q->num_rows() > 0)
-			return true;
-		else
-			return false;
-	}
-
 	function createUser($pData)
 	{
 		$groups = '';

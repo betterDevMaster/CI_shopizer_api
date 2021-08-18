@@ -58,13 +58,6 @@ class Customer_model extends CI_Model
 		return true;
 	}
 
-	function delete_User($id)
-	{
-		$this->db->where('id', $id);
-		$this->db->delete($this->tblUser);
-		return true;
-	}
-
 	function update_UserPassword($pData)
 	{
 		$where = array('id' => $pData['userId'], 'password' => md5($pData['current']));

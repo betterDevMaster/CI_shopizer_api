@@ -3,7 +3,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Store_model extends CI_Model
 {
-	public $tblDefault = 'tbl_default';
+	public $tblStore = 'tbl_store';
 	public $tblUserDelivery = 'tbl_user_delivery';
 	public $tblLogo = 'tbl_logo';
 	public $tblSupportedLanguages = 'tbl_supported_languages';
@@ -17,11 +17,11 @@ class Store_model extends CI_Model
 	{
 		if (!$list) {
 			if (!$names)
-				$default = $this->db->select('*')->get_where($this->tblDefault, array('code' => $store))->row_array();
+				$default = $this->db->select('*')->get_where($this->tblStore, array('code' => $store))->row_array();
 			else
-				$default = $this->db->select('*')->get($this->tblDefault)->result_array();
+				$default = $this->db->select('*')->get($this->tblStore)->result_array();
 		} else
-			$default = $this->db->select('*')->get($this->tblDefault)->result_array();
+			$default = $this->db->select('*')->get($this->tblStore)->result_array();
 
 		if ($default) {
 			if (array_key_exists('id', $default)) {
@@ -86,31 +86,12 @@ class Store_model extends CI_Model
 		$default['supportedLanguages'] = $supportedLanguageStr;
 
 		if ($update)
-			$this->db->where(array('code' => $pData['code']))->update($this->tblDefault, $default);
+			$this->db->where(array('code' => $pData['code']))->update($this->tblStore, $default);
 		else {
 			$default['address'] = $deliveryId;
-			$this->db->insert($this->tblDefault, $default);
+			$this->db->insert($this->tblStore, $default);
 		}
 
 		return true;
-	}
-
-	function delete_Store($store)
-	{
-		$this->db->where('code', $store);
-		$this->db->delete($this->tblDefault);
-		return true;
-	}
-
-	function unique_Store($store)
-	{
-		$where = array('code' => $store);
-		$this->db->where($where);
-		$q = $this->db->get($this->tblDefault);
-
-		if ($q->num_rows() > 0)
-			return true;
-		else
-			return false;
 	}
 } // END

@@ -18,13 +18,13 @@ class Category_model extends CI_Model
 	function get_CategoryDetail($id, $store, $lang, $count = null, $page = null, $filter = null, $code = null)
 	{
 		if (!$filter)
-			$category = $this->db->select('*')->get_where($this->tblCategories, array('id' => $id))->result_array();
+			$category = $this->db->select('*')->limit($count, $count * $page)->get_where($this->tblCategories, array('id' => $id))->result_array();
 		else {
 			if (!$code)
-				$category = $this->db->select('*')->get($this->tblCategories)->result_array();
+				$category = $this->db->select('*')->get($this->tblCategories, $count, $count * $page)->result_array();
 			else {
 				$this->db->where("code LIKE '%$code%'");
-				$category = $this->db->get($this->tblCategories)->result_array();
+				$category = $this->db->get($this->tblCategories, $count, $count * $page)->result_array();
 			}
 		}
 
@@ -134,23 +134,7 @@ class Category_model extends CI_Model
 		$this->db->where($where)->update($this->tblCategories, $data);
 		return $pData;
 	}
-
-	function deleteCategory($id)
-	{
-		$this->db->where('id', $id);
-		$this->db->delete($this->tblCategories);
-		return true;
-	}
-
-	function uniqueCategory($code)
-	{
-		$q = $this->db->get_where($this->tblCategories, array('code' => $code));
-		if ($q->num_rows() > 0)
-			return true;
-		else
-			return false;
-	}
-
+	
 	function moveCategory($pData)
 	{
 		$where = array('id' => $pData['childId']);

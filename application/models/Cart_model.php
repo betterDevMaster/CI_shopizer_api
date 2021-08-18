@@ -17,7 +17,7 @@ class Cart_model extends CI_Model
 	public $tblProperties = 'tbl_properties';
 	public $tblProperty = 'tbl_property';
 	public $tblPropertyValue = 'tbl_property_value';
-	public $tblType = 'tbl_type';
+	public $tblPropertyType = 'tbl_property_type';
 	public $tblReview = 'tbl_review';
 	public $tblUserBilling = 'tbl_user_billing';
 	public $tblUserDelivery = 'tbl_user_delivery';
@@ -108,7 +108,7 @@ class Cart_model extends CI_Model
 			array_push($product['properties'], $properties);
 		}
 		// Type
-		$type = $this->db->select('*')->get_where($this->tblType, array('id' => $product['type']))->row_array();
+		$type = $this->db->select('*')->get_where($this->tblPropertyType, array('id' => $product['type']))->row_array();
 		$type['description'] = $this->db->select('*')->get_where($this->tblDescription, array('id' => $type['description']))->row_array();
 		$product['type'] = $type;
 
