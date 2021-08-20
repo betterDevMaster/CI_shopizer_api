@@ -39,7 +39,7 @@ class Stores extends REST_Controller
 
 	public function deleteStore_delete()
 	{
-		$response =	$this->common->delete_TableRecord($_REQUEST['store'], $this->tblStore);
+		$response =	$this->common->delete_TableRecordWithCondition(array('code' => $_REQUEST['store']), $this->tblStore);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 

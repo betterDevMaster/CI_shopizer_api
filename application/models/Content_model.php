@@ -4,6 +4,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 class Content_model extends CI_Model
 {
 	public $tblContent = 'tbl_content';
+	public $tblContentImages = 'tbl_content_images';
 	public $tblCategories = 'tbl_categories';
 	public $tblDescription = 'tbl_description';
 
@@ -20,13 +21,28 @@ class Content_model extends CI_Model
 		return $content;
 	}
 
-	function get_Pages($page, $count, $store, $lang)
+	function get_Pages($page, $count, $store, $lang, $boxes)
 	{
-		$contents = $this->db->select('*')->get($this->tblContent)->result_array();
-		for ($i = 0; $i < count($contents); $i++) {
-			$contents[$i]['description'] = $this->db->select('*')->get_where($this->tblDescription, array('id' => $contents[$i]['description']))->row_array();
+		if (!$boxes)
+			$where = array('contentType' => null);
+		else
+			$where = array('contentType' => 'BOX');
+
+		$recordsTotal = $this->db->from($this->tblContent)->where($where)->count_all_results();
+		$totalPages = ceil($recordsTotal / $count);
+		$contents = $this->db->select('*')->limit($count, $count * $page)->get_where($this->tblContent, $where)->result_array();
+		foreach ($contents as $k1 => $v1) {
+			if (!$v1) continue;
+			$contents[$k1]['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $v1['descriptions']);
+			foreach ($contents[$k1]['descriptions'] as $k2 => $v2) {
+				if ($v2['language'] == $lang || $lang == '_all') {
+					$contents[$k1]['description'] = $v2;
+					break;
+				}
+			}
 		}
-		return $contents;
+		$result = array($recordsTotal, $totalPages, $contents);
+		return $result;
 	}
 
 	function get_Category($page, $count, $store, $lang, $parentId)
@@ -40,10 +56,88 @@ class Content_model extends CI_Model
 		return $contents;
 	}
 
-	function get_PageDetail($pData)
+	function get_PageDetail($pData, $box = false)
 	{
-		$contents = $this->db->select('*')->get_where($this->tblContent, array('code' => $pData['contentID']))->row_array();
-		$contents['description'] = $this->db->select('*')->get_where($this->tblDescription, array('id' => $contents['description']))->row_array();
+		if (!$box)
+			$where = array('code' => $pData['contentID'], 'contentType' => null);
+		else
+			$where = array('code' => $pData['contentID'], 'contentType' => 'BOX');
+
+		$contents = $this->db->select('*')->get_where($this->tblContent, $where)->row_array();
+		$contents['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $contents['descriptions']);
+		$contents['description'] = count($contents['descriptions']) > 0 ? $contents['descriptions'][0] : null;
 		return $contents;
+	}
+
+	function updatePage($pData, $id, $box = false)
+	{
+		$descriptions = '';
+		foreach ($pData['descriptions'] as $k => $v) {
+			unset($v['id']);
+			$this->db->insert($this->tblDescription, $v);
+			$insertId = $this->db->insert_id();
+			$descriptions = $descriptions . $insertId . ',';
+		}
+		$where = array('id' => $id);
+		if (!$box) {
+			$data = array(
+				'code' => $pData['code'],
+				'mainmenu' => (int)$pData['mainmenu'],
+				'order' => (int)$pData['order'],
+				'visible' => (int)$pData['visible'],
+				'descriptions' => $descriptions,
+			);
+		} else {
+			$data = array(
+				'code' => $pData['code'],
+				'contentType' => 'BOX',
+				'visible' => (int)$pData['visible'],
+				'descriptions' => $descriptions,
+			);
+		}
+		$this->db->where($where)->update($this->tblContent, $data);
+		return true;
+	}
+
+	function createPage($pData, $box = false)
+	{
+		$descriptions = '';
+		foreach ($pData['descriptions'] as $k => $v) {
+			unset($v['id']);
+			$this->db->insert($this->tblDescription, $v);
+			$insertId = $this->db->insert_id();
+			$descriptions = $descriptions . $insertId . ',';
+		}
+		if (!$box) {
+			$data = array(
+				'code' => $pData['code'],
+				'mainmenu' => (int)$pData['mainmenu'],
+				'order' => (int)$pData['order'],
+				'visible' => (int)$pData['visible'],
+				'descriptions' => $descriptions,
+			);
+		} else {
+			$data = array(
+				'code' => $pData['code'],
+				'contentType' => 'BOX',
+				'visible' => (int)$pData['visible'],
+				'descriptions' => $descriptions,
+			);
+		}
+		$this->db->insert($this->tblContent, $data);
+		return true;
+	}
+
+	function addImage($parentPath, $qquuid, $qqfilename, $qqtotalfilesize, $target_file)
+	{
+		$data = array(
+			'name' => $qqfilename,
+			'size' => $qqtotalfilesize,
+			'ptah' => 'image.png',
+			'url' => $target_file
+		);
+		$this->db->insert($this->tblContentImages, $data);
+		$result = array('error' => null, 'preventRetry' => true, 'success' => true);
+		return $result;
 	}
 } // END

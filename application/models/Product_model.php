@@ -12,6 +12,7 @@ class Product_model extends CI_Model
 	public $tblOptionValue = 'tbl_option_value';
 	public $tblProductPrice = 'tbl_product_price';
 	public $tblProductSpecification = 'tbl_product_specification';
+	public $tblProductGroups = 'tbl_product_groups';
 	public $tblProperties = 'tbl_properties';
 	public $tblProperty = 'tbl_property';
 	public $tblPropertyValue = 'tbl_property_value';
@@ -21,14 +22,14 @@ class Product_model extends CI_Model
 	public $tblUserBilling = 'tbl_user_billing';
 	public $tblUserDelivery = 'tbl_user_delivery';
 	public $tblAttributes = 'tbl_attributes';
-	public $tblLang = 'tbl_lang';
+	public $tblSupportedLanguages = 'tbl_supported_languages';
 
 	public function __construct()
 	{
 		parent::__construct();
 	}
 
-	function get_FeaturedItem($store, $lang, $category = null, $manufacturer = '', $productId = null)
+	function get_FeaturedItem($store = null, $lang = null, $category = null, $manufacturer = null, $productId = null)
 	{
 		if (!$productId) {
 			if (!$category)
@@ -68,23 +69,25 @@ class Product_model extends CI_Model
 			}
 
 			// Description
-			$descriptionList = explode(',', $v1['descriptions']);
-			$langs = $this->db->select('code')->get($this->tblLang)->result_array();
-			if ($lang == '_all') {
-				$products[$k1]['descriptions'] = array();
-				foreach ($descriptionList as $k9 => $v9) {
-					if (!$v9) continue;
-					$descriptions = $this->db->select('*')->get_where($this->tblDescription, array('id' => $v9))->row_array();
-					array_push($products[$k1]['descriptions'], $descriptions);
-				}
-			} else {
-				foreach ($langs as $k10 => $v10) {
-					if ($lang == $v10['code']) {
-						$products[$k1]['description'] = $this->db->select('*')->get_where($this->tblDescription, array('id' => $descriptionList[$k10]))->row_array();
-						break;
-					}
-				}
-			}
+			$products[$k1]['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $products[$k1]['descriptions']);
+			$products[$k1]['description'] = count($products[$k1]['descriptions']) > 0 ? $products[$k1]['descriptions'][0] : null;
+			// $descriptionList = explode(',', $v1['descriptions']);
+			// $langs = $this->db->select('code')->get($this->tblSupportedLanguages)->result_array();
+			// if ($lang == '_all') {
+			// 	$products[$k1]['descriptions'] = array();
+			// 	foreach ($descriptionList as $k9 => $v9) {
+			// 		if (!$v9) continue;
+			// 		$descriptions = $this->db->select('*')->get_where($this->tblDescription, array('id' => $v9))->row_array();
+			// 		array_push($products[$k1]['descriptions'], $descriptions);
+			// 	}
+			// } else {
+			// 	foreach ($langs as $k10 => $v10) {
+			// 		if ($lang == $v10['code']) {
+			// 			$products[$k1]['description'] = $this->db->select('*')->get_where($this->tblDescription, array('id' => $descriptionList[$k10]))->row_array();
+			// 			break;
+			// 		}
+			// 	}
+			// }
 
 			// Image
 			$products[$k1]['image'] = $this->db->select('*')->get_where($this->tblImage, array('id' => $v1['image']))->row_array();
@@ -99,7 +102,7 @@ class Product_model extends CI_Model
 
 			// Manufacturer
 			$manufacturer = $this->db->select('*')->get_where($this->tblManufacturer, array('id' => $v1['manufacturer']))->row_array();
-			$manufacturer['description'] = $this->db->select('*')->get_where($this->tblDescription, array('id' => $manufacturer['description']))->row_array();
+			$manufacturer['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $manufacturer['descriptions']);
 			$products[$k1]['manufacturer'] = $manufacturer;
 
 			// Options
@@ -145,9 +148,10 @@ class Product_model extends CI_Model
 			}
 
 			// Type
-			$type = $this->db->select('*')->get_where($this->tblPropertyType, array('id' => $v1['type']))->row_array();
-			$type['description'] = $this->db->select('*')->get_where($this->tblDescription, array('id' => $type['description']))->row_array();
-			$products[$k1]['type'] = $type;
+			$propertyType = $this->db->select('*')->get_where($this->tblPropertyType, array('id' => $v1['type']))->row_array();
+			$propertyType['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $propertyType['descriptions']);
+			// $propertyType['description'] = $this->db->select('*')->get_where($this->tblDescription, array('id' => $propertyType['description']))->row_array();
+			$products[$k1]['type'] = $propertyType;
 		}
 		return $products;
 	}
@@ -225,6 +229,7 @@ class Product_model extends CI_Model
 	{
 		$descriptions = '';
 		foreach ($pData['descriptions'] as $k => $v) {
+			unset($v['id']);
 			$this->db->insert($this->tblDescription, array('language' => $v['language'], 'name' => $v['name']));
 			$insertId = $this->db->insert_id();
 			$descriptions = $descriptions . $insertId . ',';
@@ -246,6 +251,7 @@ class Product_model extends CI_Model
 	{
 		$descriptions = '';
 		foreach ($pData['descriptions'] as $k => $v) {
+			unset($v['id']);
 			$this->db->insert($this->tblDescription, array('language' => $v['language'], 'name' => $v['name']));
 			$insertId = $this->db->insert_id();
 			$descriptions = $descriptions . $insertId . ',';
@@ -284,6 +290,7 @@ class Product_model extends CI_Model
 	{
 		$descriptions = '';
 		foreach ($pData['descriptions'] as $k => $v) {
+			unset($v['id']);
 			$this->db->insert($this->tblDescription, array('language' => $v['language'], 'name' => $v['name']));
 			$insertId = $this->db->insert_id();
 			$descriptions = $descriptions . $insertId . ',';
@@ -305,6 +312,7 @@ class Product_model extends CI_Model
 		$descriptions = '';
 		$enName = $pData['descriptions'][0]['name'];
 		foreach ($pData['descriptions'] as $k => $v) {
+			unset($v['id']);
 			$this->db->insert($this->tblDescription, array('language' => $v['language'], 'name' => $v['name']));
 			$insertId = $this->db->insert_id();
 			$descriptions = $descriptions . $insertId . ',';
@@ -450,6 +458,185 @@ class Product_model extends CI_Model
 			'optionValue' => (int)$pData['optionValue'],
 		);
 		$this->db->insert($this->tblPropertyVariation, $data);
+		return true;
+	}
+
+
+	function get_Manufacturers($store, $lang, $page, $count)
+	{
+		$manufacturers = $this->db->select('*')->get($this->tblManufacturer)->result_array();
+		foreach ($manufacturers as $k1 => $v1) {
+			if (!$v1) continue;
+			$manufacturers[$k1]['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $v1['descriptions']);
+			foreach ($manufacturers[$k1]['descriptions'] as $k2 => $v2) {
+				if ($v2['language'] == $lang) {
+					$manufacturers[$k1]['description'] = $v2;
+					break;
+				}
+			}
+		}
+		return $manufacturers;
+	}
+
+	function get_ManufacturerById($id, $lang)
+	{
+		$manufacturer = $this->db->select('*')->get_where($this->tblManufacturer, array('id' => $id))->row_array();
+		$manufacturer['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $manufacturer['descriptions']);
+
+		foreach ($manufacturer['descriptions'] as $k2 => $v2) {
+			if ($v2['language'] == $lang || $lang == '_all') {
+				$manufacturer['description'] = $v2;
+				break;
+			}
+		}
+		return $manufacturer;
+	}
+
+	function updateManufacturer($pData, $id)
+	{
+		$descriptions = '';
+		foreach ($pData['descriptions'] as $k => $v) {
+			unset($v['id']);
+			$this->db->insert($this->tblDescription, $v);
+			$insertId = $this->db->insert_id();
+			$descriptions = $descriptions . $insertId . ',';
+		}
+		$where = array('id' => $id);
+		$data = array(
+			'code' => $pData['code'],
+			'descriptions' => $descriptions,
+			'order' => (int)$pData['order'],
+			'selectedLanguage' => $pData['selectedLanguage'],
+		);
+
+		$this->db->where($where);
+		$this->db->update($this->tblManufacturer, $data);
+		return true;
+	}
+
+	function createManufacturer($pData)
+	{
+		$descriptions = '';
+		foreach ($pData['descriptions'] as $k => $v) {
+			unset($v['id']);
+			$this->db->insert($this->tblDescription, $v);
+			$insertId = $this->db->insert_id();
+			$descriptions = $descriptions . $insertId . ',';
+		}
+		$data = array(
+			'code' => $pData['code'],
+			'descriptions' => $descriptions,
+			'order' => (int)$pData['order'],
+			'selectedLanguage' => $pData['selectedLanguage'],
+		);
+		$this->db->insert($this->tblManufacturer, $data);
+		return true;
+	}
+
+
+	function get_ProductsByGroup($groupCode)
+	{
+		$group = $this->db->select('*')->get_where($this->tblProductGroups, array('code' => $groupCode))->row_array();
+		$productLists = explode(',', $group['products']);
+		$group['products'] = array();
+		foreach ($productLists as $k1 => $v1) {
+			if (!$v1) continue;
+			$product = $this->get_FeaturedItem(null, null, null, null, $v1);
+			$group['products'][$k1] = $product[0];
+		}
+		return $group['products'];
+	}
+
+	function addProductToGroup($productId, $groupCode)
+	{
+		$group = $this->db->select('*')->get_where($this->tblProductGroups, array('code' => $groupCode))->row_array();
+		$productStr = $group['products'] . $productId . ',';
+
+		$where = array('code' => $groupCode);
+		$data = array('products' => $productStr);
+
+		$this->db->where($where);
+		$this->db->update($this->tblProductGroups, $data);
+		return true;
+	}
+
+	function removeProductFromGroup($productId, $groupCode)
+	{
+		$group = $this->db->select('*')->get_where($this->tblProductGroups, array('code' => $groupCode))->row_array();
+		$productArr = explode(',', $group['products']);
+
+		if (($key = array_search($productId, $productArr)) !== false)
+			unset($productArr[$key]);
+
+		$newProductStr = '';
+		foreach ($productArr as $k => $v) {
+			if (!$v) continue;
+			$newProductStr = $newProductStr . $v . ',';
+		}
+
+		$where = array('code' => $groupCode);
+		$data = array('products' => $newProductStr);
+
+		$this->db->where($where);
+		$this->db->update($this->tblProductGroups, $data);
+	}
+
+	function createProductGroup($pData)
+	{
+		$data = array(
+			'code' => $pData['code'],
+			'active' => $pData['active'],
+		);
+		$this->db->insert($this->tblProductGroups, $data);
+		return true;
+	}
+
+	function updateGroupActiveValue($pData, $groupCode)
+	{
+		$where = array('code' => $groupCode);
+		$data = array('active' => (int)$pData['active']);
+		$this->db->where($where)->update($this->tblProductGroups, $data);
+		return true;
+	}
+
+	function createType($pData)
+	{
+		$descriptions = '';
+		foreach ($pData['descriptions'] as $k => $v) {
+			unset($v['id']);
+			$this->db->insert($this->tblDescription, $v);
+			$insertId = $this->db->insert_id();
+			$descriptions = $descriptions . $insertId . ',';
+		}
+		$data = array(
+			'code' => $pData['code'],
+			'allowAddToCart' => $pData['allowAddToCart'],
+			'selectedLanguage' => $pData['selectedLanguage'],
+			'visible' => $pData['visible'],
+			'descriptions' => $descriptions,
+		);
+		$this->db->insert($this->tblPropertyType, $data);
+		return true;
+	}
+	
+	function updateType($pData, $id)
+	{
+		$descriptions = '';
+		foreach ($pData['descriptions'] as $k => $v) {
+			unset($v['id']);
+			$this->db->insert($this->tblDescription, $v);
+			$insertId = $this->db->insert_id();
+			$descriptions = $descriptions . $insertId . ',';
+		}
+		$where = array('id' => $id);
+		$data = array(
+			'allowAddToCart' => (int)$pData['allowAddToCart'],
+			'selectedLanguage' => $pData['selectedLanguage'],
+			'visible' => (int)$pData['visible'],
+			'descriptions' => $descriptions,
+		);
+
+		$this->db->where($where)->update($this->tblPropertyType, $data);
 		return true;
 	}
 } // END

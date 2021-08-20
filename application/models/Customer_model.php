@@ -8,7 +8,7 @@ class Customer_model extends CI_Model
 	public $tblUserBilling = 'tbl_user_billing';
 	public $tblUserDelivery = 'tbl_user_delivery';
 	public $tblConfig = 'tbl_config';
-	public $tblGroups = 'tbl_groups';
+	public $tblProductGroups = 'tbl_product_groups';
 	public $tblPermissions = 'tbl_permissions';
 
 	public function __construct()
@@ -101,7 +101,7 @@ class Customer_model extends CI_Model
 		else
 			$user = $this->db->select('*')->get_where($this->tblUser, array('isAdmin' => $isAdmin))->row_array();
 
-		$user['groups'] = GetTableDetails($this, $this->tblGroups, 'id', $user['groups']);
+		$user['groups'] = GetTableDetails($this, $this->tblProductGroups, 'id', $user['groups']);
 		$user['permissions'] = GetTableDetails($this, $this->tblPermissions, 'id', $user['permissions']);
 		$user['billing'] = $this->db->select('*')->get_where($this->tblUserBilling, array('userId' => $id, 'id' => $user['billing']))->row_array();
 		$user['delivery'] = $this->db->select('*')->get_where($this->tblUserDelivery, array('userId' => $id, 'id' => $user['delivery']))->row_array();

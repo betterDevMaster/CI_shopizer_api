@@ -3,8 +3,8 @@
 class Admin_model extends CI_Model
 {
 	public $tblUser = 'tbl_user';
-	public $tblLang = 'tbl_lang';
-	public $tblGroups = 'tbl_groups';
+	public $tblSupportedLanguages = 'tbl_supported_languages';
+	public $tblProductGroups = 'tbl_product_groups';
 	public $tblPermissions = 'tbl_permissions';
 	public $tblCurrency = 'tbl_currency';
 	public $tblMeasures = 'tbl_measures';

@@ -60,38 +60,38 @@ class Category extends REST_Controller
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
-	public function updateCategory_post() 
+	public function updateCategory_post()
 	{
 		$response = $this->category->updateCategory($this->post());
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
-	public function addCategory_post() 
+	public function addCategory_post()
 	{
 		$response = $this->category->addCategory($this->post());
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
-	public function visible_post() 
+	public function visible_post()
 	{
 		$response = $this->category->visible($this->post());
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
-	public function deleteCategory_delete() 
+	public function deleteCategory_delete()
 	{
-		$response =	$this->common->delete_TableRecord($_REQUEST['id'], $this->tblCategories);
+		$response =	$this->common->delete_TableRecordWithCondition(array('id' => $_REQUEST['id']), $this->tblCategories);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
-	public function unique_get() 
+	public function unique_get()
 	{
 		$where = array('code' => $_REQUEST['code']);
 		$response = $this->common->get_UniqueTableRecord($where, $this->tblCategories);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
-	public function move_put() 
+	public function move_put()
 	{
 		$response = $this->category->moveCategory($this->put());
 		$this->response($response, REST_Controller::HTTP_OK);

@@ -16,6 +16,8 @@ class Product extends REST_Controller
 	public $tblOptions = 'tbl_options';
 	public $tblOptionValue = 'tbl_option_value';
 	public $tblProperty = 'tbl_property';
+	public $tblProductGroups = 'tbl_product_groups';
+	public $tblDescription = 'tbl_description';
 
 	public function __construct()
 	{
@@ -92,7 +94,7 @@ class Product extends REST_Controller
 
 	public function deleteOption_delete()
 	{
-		$response =	$this->common->delete_TableRecord($_REQUEST['id'], $this->tblOptions);
+		$response =	$this->common->delete_TableRecordWithCondition(array('id' => $_REQUEST['id']), $this->tblOptions);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
@@ -118,13 +120,6 @@ class Product extends REST_Controller
 		$productId = isset($_REQUEST['productId']) ? $_REQUEST['productId'] : 0;
 		$attributes  = $this->product->get_Attributes($productId, $count, $store, $lang, $page);
 		$response = array('attributes' => $attributes, 'number' => count($attributes), 'recordsFiltered' => 0, 'recordsTotal' => count($attributes), 'totalPages' => ceil(count($attributes) / $count));
-		$this->response($response, REST_Controller::HTTP_OK);
-	}
-
-	public function manufacturer_get()
-	{
-		$manufacturers  = $this->common->get_TableContentWithArrayResult($this->tblManufacturer);
-		$response = array('number' => count($manufacturers), 'manufacturers' => $manufacturers, 'recordsFiltered' => 0, 'recordsTotal' => count($manufacturers),  'totalPages' => 1);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
@@ -156,7 +151,7 @@ class Product extends REST_Controller
 
 	public function deleteOptionValue_delete()
 	{
-		$response =	$this->common->delete_TableRecord($_REQUEST['id'], $this->tblOptionValue);
+		$response =	$this->common->delete_TableRecordWithCondition(array('id' => $_REQUEST['id']), $this->tblOptionValue);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
@@ -205,7 +200,7 @@ class Product extends REST_Controller
 
 	public function deleteImage_delete()
 	{
-		$response =	$this->common->delete_TableRecord($_REQUEST['id'], $this->tblOptionValue);
+		$response =	$this->common->delete_TableRecordWithCondition(array('id' => $_REQUEST['id']), $this->tblOptionValue);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
@@ -234,7 +229,7 @@ class Product extends REST_Controller
 
 	public function deleteProperty_delete($id)
 	{
-		$response =	$this->common->delete_TableRecord($id, $this->tblProperty);
+		$response =	$this->common->delete_TableRecordWithCondition(array('id' => $id), $this->tblProperty);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
@@ -261,6 +256,40 @@ class Product extends REST_Controller
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
+	public function getType_get($id)
+	{
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
+		$response  = $this->common->get_TableContentWithRowResultAndCondition(array('id' => $id), $this->tblPropertyType);
+		$response['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $response['descriptions']);
+		$response['description'] = count($response['descriptions']) > 0 ? $response['descriptions'][0] : null;
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function createType_post()
+	{
+		$response = $this->product->createType($this->post());
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function updateType_put($id)
+	{
+		$response  = $this->product->updateType($this->put(), $id);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function deleteType_delete($id)
+	{
+		$response =	$this->common->delete_TableRecordWithCondition(array('id' => $id), $this->tblPropertyType);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function uniqueType_get()
+	{
+		$where = array('code' => $_REQUEST['code']);
+		$response = $this->common->get_UniqueTableRecord($where, $this->tblPropertyType);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
 
 	// Product / Variation	
 	public function uniqueVariation_get()
@@ -283,6 +312,97 @@ class Product extends REST_Controller
 	public function createVariation_post()
 	{
 		$response = $this->product->createVariation($this->post());
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+
+	// Product / Manufacturer	
+	public function manufacturer_get()
+	{
+		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
+		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
+
+		$manufacturers  = $this->product->get_Manufacturers($store, $lang, $page, $count);
+		$response = array('number' => count($manufacturers), 'manufacturers' => $manufacturers, 'recordsFiltered' => 0, 'recordsTotal' => count($manufacturers),  'totalPages' => 1);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function getManufacturer_get($id)
+	{
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$response  = $this->product->get_ManufacturerById($id, $lang);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function updateManufacturer_put($id)
+	{
+		$response  = $this->product->updateManufacturer($this->put(), $id);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function createManufacturer_post()
+	{
+		$response = $this->product->createManufacturer($this->post());
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function deleteManufacturer_delete($id)
+	{
+		$response =	$this->common->delete_TableRecordWithCondition(array('id' => $id), $this->tblManufacturer);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function uniqueManufacturer_get()
+	{
+		$where = array('code' => $_REQUEST['code']);
+		$response = $this->common->get_UniqueTableRecord($where, $this->tblManufacturer);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+
+	// Product / Groups	
+	public function groups_get()
+	{
+		$response = $this->common->get_TableContentWithArrayResult($this->tblProductGroups);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function getProductsByGroup_get($groupCode)
+	{
+		$products = $this->product->get_ProductsByGroup($groupCode);
+		$response = array('number' => count($products), 'products' => $products, 'recordsFiltered' => 0, 'recordsTotal' => count($products),  'totalPages' => 1);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function addProductToGroup_post($productId, $groupCode)
+	{
+		$response = $this->product->addProductToGroup($productId, $groupCode);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function removeProductFromGroup_delete($productId, $groupCode)
+	{
+		$response = $this->product->removeProductFromGroup($productId, $groupCode);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function deleteProductGroup_delete($groupCode)
+	{
+		$response =	$this->common->delete_TableRecordWithCondition(array('code' => $groupCode), $this->tblManufacturer);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function createProductGroup_post()
+	{
+		$response =	$this->product->createProductGroup($this->post());
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function updateGroupActiveValue_post($groupCode)
+	{
+		$response =	$this->product->updateGroupActiveValue($this->post(), $groupCode);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 }

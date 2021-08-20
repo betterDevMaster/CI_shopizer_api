@@ -117,7 +117,7 @@ class Customer extends REST_Controller
 
 	public function deleteUser_delete()
 	{
-		$response =	$this->common->delete_TableRecord($_REQUEST['id'], $this->tblUser);
+		$response =	$this->common->delete_TableRecordWithCondition(array('id' => $_REQUEST['id']), $this->tblUser);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 

@@ -27,3 +27,15 @@ if (!function_exists('SetTableIDsToString')) {
 		// supportedLanguages
 	}
 }
+
+if (!function_exists('insertCurrencyFromJson_get')) {
+	function insertContentFromJson_get($_this, $targetDirFile, $table)
+	{
+		$content = file_get_contents(dirname(__FILE__) . $targetDirFile, false);
+		$json = json_decode($content, true);
+
+		foreach ($json as $k => $v) {
+			$_this->db->insert($table, $v);
+		}
+	}
+}

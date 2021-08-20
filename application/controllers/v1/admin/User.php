@@ -12,8 +12,8 @@ require APPPATH . 'helpers/jwt_helper.php';
 class User extends REST_Controller
 {
 	public $tblUser = 'tbl_user';
-	public $tblLang = 'tbl_lang';
-	public $tblGroups = 'tbl_groups';
+	public $tblSupportedLanguages = 'tbl_supported_languages';
+	public $tblProductGroups = 'tbl_product_groups';
 	public $tblPermissions = 'tbl_permissions';
 	public $tblCurrency = 'tbl_currency';
 	public $tblMeasures = 'tbl_measures';
@@ -46,19 +46,13 @@ class User extends REST_Controller
 
 	public function language_get()
 	{
-		$response  = $this->common->get_TableContentWithArrayResult($this->tblLang);
+		$response  = $this->common->get_TableContentWithArrayResult($this->tblSupportedLanguages);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
 	public function profile_get()
 	{
 		$response = $this->customer->get_UserProfile(null, 1);
-		$this->response($response, REST_Controller::HTTP_OK);
-	}
-
-	public function groups_get()
-	{
-		$response  = $this->common->get_TableContentWithArrayResult($this->tblGroups);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
@@ -73,7 +67,7 @@ class User extends REST_Controller
 
 	public function deleteUser_delete()
 	{
-		$response =	$this->common->delete_TableRecord($_REQUEST['userId'], $this->tblUser);
+		$response =	$this->common->delete_TableRecordWithCondition(array('id' => $_REQUEST['userId']), $this->tblUser);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
@@ -112,16 +106,6 @@ class User extends REST_Controller
 	{
 		$response = $this->customer->get_UserProfile($_REQUEST['userId']);
 		$this->response($response, REST_Controller::HTTP_OK);
-	}
-
-	public function insertCurrencyFromJson_get()
-	{
-		$currency = file_get_contents(dirname(__FILE__) . "\currency.json", false);
-		$json = json_decode($currency, true);
-
-		foreach ($json as $k => $v) {
-			$this->db->insert('tbl_currency', $v);
-		}
 	}
 
 	public function currency_get()
