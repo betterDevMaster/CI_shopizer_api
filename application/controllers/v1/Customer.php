@@ -151,4 +151,47 @@ class Customer extends REST_Controller
 		$response  = $this->common->get_TableContentWithRowResult($this->tblConfig);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
+
+	function list_get($id = null)
+	{
+		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
+		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
+		$response = $this->customer->getList($store, $lang, $count, $page, $id);
+		if (!$id)
+			$response = array('number' => count($response[2]), 'customers' => $response[2], 'recordsFiltered' => 0, 'recordsTotal' => $response[0],  'totalPages' => $response[1]);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+	
+	public function list_post()
+	{
+		$response = $this->customer->addCustomerList($this->post());
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function list_put($id)
+	{
+		$response = $this->customer->updateCustomerList($this->put(), $id);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	function orders_get($id = null)
+	{
+		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
+		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
+		// $response = $this->customer->getOrder($store, $lang, $count, $page, $id);
+		if (!$id)
+			$response = array('number' => 0, 'orders' => null, 'recordsFiltered' => 0, 'recordsTotal' => 0,  'totalPages' => 0);
+			// $response = array('number' => count($response[2]), 'customers' => $response[2], 'recordsFiltered' => 0, 'recordsTotal' => $response[0],  'totalPages' => $response[1]);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	function request_post()
+	{
+		$response = $this->customer->resetPassword($this->post());
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
 }

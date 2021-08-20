@@ -14,6 +14,9 @@ class Module_model extends CI_Model
 	public $tblShippingInterationOptions = 'tbl_shipping_integration_options';
 	public $tblShippingOrigin = 'tbl_shipping_origin';
 	public $tblZone = 'tbl_zone';
+	public $tblTax = 'tbl_tax';
+	public $tblTaxRate = 'tbl_tax_rate';
+	public $tblDescription = 'tbl_description';
 
 	public function __construct()
 	{
@@ -190,6 +193,65 @@ class Module_model extends CI_Model
 	function updateShippingPackage($pData)
 	{
 		$this->db->where(array('code' => $pData['code']))->update($this->tblShippingPackages, $pData);
+		return true;
+	}
+
+	function getTaxModule($lang, $count, $page, $code, $table)
+	{
+		if (!$code) {
+			$recordsTotal = $this->db->from($table)->count_all_results();
+			$totalPages = ceil($recordsTotal / $count);
+			$contents = $this->db->select('*')->limit($count, $count * $page)->get($table)->result_array();
+			if ($table == $this->tblTaxRate) {
+				foreach ($contents as $k5 => $v5) {
+					if (!$v5) continue;
+					$contents[$k5]['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $contents[$k5]['descriptions']);
+				}
+			}
+
+			$result = array($recordsTotal, $totalPages, $contents);
+		} else {
+			if ($table == $this->tblTax)
+				$result = $this->db->get_where($table, array('code' => $code))->row_array();
+			else {
+				$result = $this->db->get_where($table, array('id' => $code))->row_array();
+				$result['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $result['descriptions']);
+				$result['description'] = count($result['descriptions']) > 0 ? $result['descriptions'][0] : null;
+			}
+		}
+		return $result;
+	}
+
+	function addTaxModule($pData, $table)
+	{
+		if ($table == $this->tblTaxRate) {
+			$descriptions = '';
+			foreach ($pData['descriptions'] as $k => $v) {
+				unset($v['id']);
+				$this->db->insert($this->tblDescription, $v);
+				$insertId = $this->db->insert_id();
+				$descriptions = $descriptions . $insertId . ',';
+			}
+			$pData['descriptions'] = $descriptions;
+		}
+		$this->db->insert($table, $pData);
+		$insertId = $this->db->insert_id();
+		return array('id' => $insertId);
+	}
+
+	function updateTaxModule($pData, $id, $table)
+	{
+		if ($table == $this->tblTaxRate) {
+			$descriptions = '';
+			foreach ($pData['descriptions'] as $k => $v) {
+				unset($v['id']);
+				$this->db->insert($this->tblDescription, $v);
+				$insertId = $this->db->insert_id();
+				$descriptions = $descriptions . $insertId . ',';
+			}
+			$pData['descriptions'] = $descriptions;
+		}
+		$this->db->where(array('id' => $id))->update($table, $pData);
 		return true;
 	}
 } // END

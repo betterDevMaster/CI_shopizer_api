@@ -103,8 +103,8 @@ class Customer_model extends CI_Model
 
 		$user['groups'] = GetTableDetails($this, $this->tblProductGroups, 'id', $user['groups']);
 		$user['permissions'] = GetTableDetails($this, $this->tblPermissions, 'id', $user['permissions']);
-		$user['billing'] = $this->db->select('*')->get_where($this->tblUserBilling, array('userId' => $id, 'id' => $user['billing']))->row_array();
-		$user['delivery'] = $this->db->select('*')->get_where($this->tblUserDelivery, array('userId' => $id, 'id' => $user['delivery']))->row_array();
+		$user['billing'] = $this->db->select('*')->get_where($this->tblUserBilling, array('id' => $user['billing']))->row_array();
+		$user['delivery'] = $this->db->select('*')->get_where($this->tblUserDelivery, array('id' => $user['delivery']))->row_array();
 
 		return $user;
 	}
@@ -123,5 +123,70 @@ class Customer_model extends CI_Model
 			$this->db->insert($table, $pData);
 			return false;
 		}
+	}
+
+	function getList($store, $lang, $count, $page, $id)
+	{
+		if (!$id) {
+			$recordsTotal = $this->db->from($this->tblUser)->count_all_results();
+			$totalPages = ceil($recordsTotal / $count);
+			$contents = $this->db->select('*')->limit($count, $count * $page)->get($this->tblUser)->result_array();
+			foreach ($contents as $k5 => $v5) {
+				if (!$v5) continue;
+				$contents[$k5]['billing'] = $this->db->select('*')->get_where($this->tblUserBilling, array('id' => $v5['billing']))->row_array();
+				$contents[$k5]['delivery'] = $this->db->select('*')->get_where($this->tblUserDelivery, array('id' => $v5['delivery']))->row_array();
+			}
+			$result = array($recordsTotal, $totalPages, $contents);
+		} else {
+			$result = $this->db->get_where($this->tblUser, array('id' => $id))->row_array();
+			$result['billing'] = $this->db->select('*')->get_where($this->tblUserBilling, array('id' => $result['billing']))->row_array();
+			$result['delivery'] = $this->db->select('*')->get_where($this->tblUserDelivery, array('id' => $result['delivery']))->row_array();
+		}
+		return $result;
+	}
+
+	function addCustomerList($pData)
+	{
+	}
+
+	function updateCustomerList($pData, $id)
+	{
+		$country = $pData['billing']['country'];
+		$stateProvince = $pData['billing']['zone'];
+		unset($pData['billing']['country']);
+		unset($pData['billing']['zone']);
+		unset($pData['delivery']['country']);
+		unset($pData['delivery']['zone']);
+
+		$billingData = array(
+			'countryCode' => $country,
+			'stateProvince' => $stateProvince,
+		);
+		$billingData = $billingData + $pData['billing'];
+		$this->db->where(array('id' => $id))->update($this->tblUserBilling, $billingData);
+
+		$deliveryData = array(
+			'countryCode' => $country,
+			'stateProvince' => $stateProvince,
+		);
+		$deliveryData = $deliveryData + $pData['delivery'];
+		$this->db->where(array('id' => $id))->update($this->tblUserDelivery, $deliveryData);
+
+		$userData = array(
+			'firstName' => $pData['billing']['firstName'],
+			'lastName' => $pData['billing']['lastName'],
+			'countryCode' => $country,
+			'stateProvince' => $stateProvince,
+			'postalCode' => $pData['billing']['postalCode'],
+			'emailAddress' => $pData['emailAddress'],
+		);
+		$this->db->where(array('id' => $id))->update($this->tblUser, $userData);
+		return true;
+	}
+
+	function resetPassword($pData)
+	{
+		$this->db->where(array('userName' => $pData['username']))->update($this->tblUser, array('password' => md5('123123123@')));
+		return true;
 	}
 } // END

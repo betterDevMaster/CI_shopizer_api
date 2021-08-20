@@ -14,6 +14,8 @@ class Modules extends REST_Controller
 	public $tblMethods = 'tbl_modules';
 	public $tblShippingOrigin = 'tbl_shipping_origin';
 	public $tblShippingPackages = 'tbl_shipping_packages';
+	public $tblTax = 'tbl_tax';
+	public $tblTaxRate = 'tbl_tax_rate';
 
 	public function __construct()
 	{
@@ -113,6 +115,79 @@ class Modules extends REST_Controller
 	public function shippingPackage_delete($code = null)
 	{
 		$response =	$this->common->delete_TableRecordWithCondition(array('code' => $code), $this->tblShippingPackages);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function taxClass_get($code = null)
+	{
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
+		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
+		$response = $this->module->getTaxModule($lang, $count, $page, $code, $this->tblTax);
+		if (!$code)
+			$response = array('number' => count($response[2]), 'items' => $response[2], 'recordsFiltered' => 0, 'recordsTotal' => $response[0],  'totalPages' => $response[1]);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function taxClass_post()
+	{
+		$response = $this->module->addTaxModule($this->post(), $this->tblTax);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function taxClass_put($id)
+	{
+		$response = $this->module->updateTaxModule($this->put(), $id, $this->tblTax);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function taxClass_delete($id)
+	{
+		$response =	$this->common->delete_TableRecordWithCondition(array('id' => $id), $this->tblTax);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function uniqueTaxClass_get()
+	{
+		$where = array('code' => $_REQUEST['code']);
+		$response = $this->common->get_UniqueTableRecord($where, $this->tblTax);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	
+	public function taxRates_get($id = null)
+	{
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
+		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
+		$response = $this->module->getTaxModule($lang, $count, $page, $id, $this->tblTaxRate);
+		if (!$id)
+			$response = array('number' => count($response[2]), 'items' => $response[2], 'recordsFiltered' => 0, 'recordsTotal' => $response[0],  'totalPages' => $response[1]);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function taxRate_post()
+	{
+		$response = $this->module->addTaxModule($this->post(), $this->tblTaxRate);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function taxRate_put($id)
+	{
+		$response = $this->module->updateTaxModule($this->put(), $id, $this->tblTaxRate);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function taxRate_delete($id)
+	{
+		$response =	$this->common->delete_TableRecordWithCondition(array('id' => $id), $this->tblTaxRate);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function uniqueTaxRate_get()
+	{
+		$where = array('code' => $_REQUEST['code']);
+		$response = $this->common->get_UniqueTableRecord($where, $this->tblTaxRate);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 }
