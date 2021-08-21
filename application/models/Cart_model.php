@@ -141,7 +141,8 @@ class Cart_model extends CI_Model
 		}
 
 		if (!$data) return;
-		if (count($data) > 0) {
+
+		if (count($data) > 0 && isset($data['products']) && $data['quantity']) {
 			$dupliCatedProductId = false;
 
 			$products = explode(',', $data['products']);
@@ -174,6 +175,10 @@ class Cart_model extends CI_Model
 			$data['products'] = $pData['productId'] . ',';
 			$data['quantity'] = $pData['quantity'] . ',';
 			$this->db->insert($this->tblCart, $data);
+			$inserId = $this->db->insert_id();
+			$data = $this->db->get_where($this->tblCart, array('id' => $inserId))->row_array();
+			$products = explode(',', $data['products']);
+			$quantitys = explode(',', $data['quantity']);
 		}
 
 		$totals = $this->db->select('*')->get($this->tblTotal)->result_array();

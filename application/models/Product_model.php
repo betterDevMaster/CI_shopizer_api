@@ -174,7 +174,7 @@ class Product_model extends CI_Model
 	{
 		$products = $this->db->select('id, descriptions, discounted, finalPrice, originalPrice')->get_where($this->tblProducts, array('id' => $pData['id']))->row_array();
 		$products['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $products['descriptions']);
-		$products['description'] = count($products['description']) > 0 ? $products['description'][0] : null;
+		$products['description'] = count($products['descriptions']) > 0 ? $products['descriptions'][0] : null;
 		return $products;
 	}
 
