@@ -26,7 +26,7 @@ class Category extends REST_Controller
 
 	public function list_get()
 	{
-		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
+		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 100;
 		$filter = isset($_REQUEST['filter']) ? $_REQUEST['filter'] : 'admin';
 		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';

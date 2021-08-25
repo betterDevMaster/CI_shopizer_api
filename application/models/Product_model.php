@@ -9,7 +9,7 @@ class Product_model extends CI_Model
 	public $tblImage = 'tbl_image';
 	public $tblManufacturer = 'tbl_manufacturer';
 	public $tblOptions = 'tbl_options';
-	public $tblOptionValue = 'tbl_option_value';
+	public $tblOptionValue = 'tbl_option_values';
 	public $tblProductPrice = 'tbl_product_price';
 	public $tblProductSpecification = 'tbl_product_specification';
 	public $tblProductGroups = 'tbl_product_groups';
@@ -66,10 +66,11 @@ class Product_model extends CI_Model
 				if (!$v2) continue;
 				$categories = $this->db->select('*')->get_where($this->tblCategories, array('id' => $v2))->row_array();
 				if ($categories) {
-					$categories['description'] = $this->db->select('*')->get_where($this->tblDescription, array('id' => $categories['description']))->row_array();
+					$categories['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $categories['descriptions']);
+					$categories['description'] = count($categories['descriptions']) > 0 && $categories['descriptions'][0] ? $categories['descriptions'][0] : null;
 					array_push($products[$k1]['categories'], $categories);
 				} else {
-					$products[$k1]['categories'] = null;
+					// $products[$k1]['categories'] = null;
 				}
 			}
 
@@ -82,22 +83,24 @@ class Product_model extends CI_Model
 
 			// Description
 			$products[$k1]['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $products[$k1]['descriptions']);
-			$products[$k1]['description'] = count($products[$k1]['descriptions']) > 0 ? $products[$k1]['descriptions'][0] : null;
+			$products[$k1]['description'] = count($products[$k1]['descriptions']) > 0 && $products[$k1]['descriptions'][0] ? $products[$k1]['descriptions'][0] : null;
 
 			// Image
 			$products[$k1]['image'] = $this->db->select('*')->get_where($this->tblImage, array('id' => $v1['image']))->row_array();
 
 			// Images
 			$imageList = explode(',', $v1['images']);
+			$products[$k1]['images'] = array();
 			foreach ($imageList as $k4 => $v4) {
-				$image = $this->db->select('*')->get_where($this->tblImage, array('id' => $v4))->result_array();
-				$products[$k1]['images'] = array();
-				$products[$k1]['images'] = $image + $products[$k1]['images'];
+				if (!$v4) continue;
+				$image = $this->db->select('*')->get_where($this->tblImage, array('id' => $v4))->row_array();
+				array_push($products[$k1]['images'], $image);
 			}
 
 			// Manufacturer
 			$manufacturer = $this->db->select('*')->get_where($this->tblManufacturer, array('id' => $v1['manufacturer']))->row_array();
 			$manufacturer['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $manufacturer['descriptions']);
+			$manufacturer['description'] = count($manufacturer['descriptions']) > 0 && $manufacturer['descriptions'][0] ? $manufacturer['descriptions'][0] : null;
 			$products[$k1]['manufacturer'] = $manufacturer;
 
 			// Options
@@ -135,27 +138,139 @@ class Product_model extends CI_Model
 			// Type
 			$propertyType = $this->db->select('*')->get_where($this->tblPropertyType, array('id' => $v1['type']))->row_array();
 			$propertyType['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $propertyType['descriptions']);
-			// $propertyType['description'] = $this->db->select('*')->get_where($this->tblDescription, array('id' => $propertyType['description']))->row_array();
+			$propertyType['description'] = count($propertyType['descriptions']) > 0 && $propertyType['descriptions'][0] ? $propertyType['descriptions'][0] : null;
 			$products[$k1]['type'] = $propertyType;
 		}
 		return $products;
 	}
 
+	function createProduct($pData)
+	{
+		$descriptions = '';
+		foreach ($pData['descriptions'] as $k => $v) {
+			unset($v['id']);
+			$this->db->insert($this->tblDescription, $v);
+			$insertId = $this->db->insert_id();
+			$descriptions = $descriptions . $insertId . ',';
+		}
+
+		if ($pData['manufacturer'] != '')
+			$manufacturerId = $this->db->select('*')->get_where($this->tblManufacturer, array('code' => $pData['manufacturer']))->row_array()['id'];
+		if ($pData['type'] != '')
+			$typeId = $this->db->select('*')->get_where($this->tblPropertyType, array('code' => $pData['type']))->row_array()['id'];
+		if (
+			$pData['productSpecifications']['height'] != '' && $pData['productSpecifications']['length'] != ''
+			&& $pData['productSpecifications']['weight'] != '' && $pData['productSpecifications']['width'] != ''
+		) {
+			$data = array(
+				'height' => $pData['productSpecifications']['height'],
+				'length' => $pData['productSpecifications']['length'],
+				'weight' => $pData['productSpecifications']['weight'],
+				'width' => $pData['productSpecifications']['width']
+			);
+			$this->db->insert($this->tblProductSpecification, $data);
+			$productSpecificationId = $this->db->insert_id();
+		}
+
+		$data = array(
+			'canBePurchased' => $pData['canBePurchased'],
+			'dateAvailable' => $pData['dateAvailable'],
+			'descriptions' => $descriptions,
+			'displaySubTotal' => $pData['displaySubTotal'],
+			'identifier' => $pData['identifier'],
+			'manufacturer' => (int)$manufacturerId,
+			'price' => $pData['price'],
+			'productSpecifications' => $productSpecificationId,
+			'quantity' => $pData['quantity'],
+			'type' => (int)$typeId,
+			'visible' => $pData['visible'],
+		);
+		$this->db->insert($this->tblProducts, $data);
+		return $pData;
+	}
+
+	function updateProduct($pData)
+	{
+		$descriptions = '';
+		foreach ($pData['descriptions'] as $k => $v) {
+			unset($v['id']);
+			$this->db->insert($this->tblDescription, $v);
+			$insertId = $this->db->insert_id();
+			$descriptions = $descriptions . $insertId . ',';
+		}
+
+		if ($pData['manufacturer'] != '')
+			$manufacturerId = $this->db->select('*')->get_where($this->tblManufacturer, array('code' => $pData['manufacturer']))->row_array()['id'];
+		if ($pData['type'] != '')
+			$typeId = $this->db->select('*')->get_where($this->tblPropertyType, array('code' => $pData['type']))->row_array()['id'];
+		if (
+			$pData['productSpecifications']['height'] != '' && $pData['productSpecifications']['length'] != ''
+			&& $pData['productSpecifications']['weight'] != '' && $pData['productSpecifications']['width'] != ''
+		) {
+			$data = array(
+				'height' => $pData['productSpecifications']['height'],
+				'length' => $pData['productSpecifications']['length'],
+				'weight' => $pData['productSpecifications']['weight'],
+				'width' => $pData['productSpecifications']['width']
+			);
+			$this->db->insert($this->tblProductSpecification, $data);
+			$productSpecificationId = $this->db->insert_id();
+		}
+
+		$data = array(
+			'canBePurchased' => $pData['canBePurchased'],
+			'capacity' => $pData['capacity'],
+			'dateAvailable' => $pData['dateAvailable'],
+			'descriptions' => $descriptions,
+			'displaySubTotal' => $pData['displaySubTotal'],
+			'identifier' => $pData['identifier'],
+			'manufacturer' => (int)$manufacturerId,
+			'price' => $pData['price'],
+			'productSpecifications' => $productSpecificationId,
+			'quantity' => $pData['quantity'],
+			'type' => (int)$typeId,
+			'visible' => $pData['visible'],
+		);
+		$this->db->where(array('identifier' => $pData['identifier']))->update($this->tblProducts, $data);
+		return true;
+	}
+
+	function addImage($file_name, $encodedImage, $id)
+	{
+		$this->db->insert($this->tblImage, array('imageName' => $file_name, 'baseImage' => $encodedImage));
+		$insertId = $this->db->insert_id();
+
+		$product = $this->db->select('image, images')->get_where($this->tblProducts, array('id' => $id))->row_array();
+		$productImages = $product['images'] . $insertId . ',';
+		if (!$product['image'])
+			$where = array('image' => $insertId, 'images' => $productImages);
+		else
+			$where = array('images' => $productImages);
+
+		$this->db->where(array('id' => $id))->update($this->tblProducts, $where);
+		return true;
+	}
+
+	function removeImage($productId, $imageId)
+	{
+		$productImages = $this->db->select('*')->get_where($this->tblProducts, array('id' => $productId))->row_array()['images'];
+		$images = str_replace($imageId . ',', '', $productImages);
+		if ($images == '' || !$images)
+			$data = array('images' => null, 'image' => null);
+		else {
+			$image = explode(',', $images);
+			$data = array('images' => $images, 'image' => $image[0]);
+		}
+		$this->db->where(array('id' => $productId))->update($this->tblProducts, $data);
+	}
 
 	function calcOption($id)
 	{
 		$optionsArr = array();
 		$options = $this->db->select('*')->get_where($this->tblOptions, array('id' => $id))->row_array();
-
 		$options['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $options['descriptions']);
-		$options['description'] = count($options['descriptions']) > 0 ? $options['descriptions'][0] : null;
+		$options['description'] = count($options['descriptions']) > 0 && $options['descriptions'][0] ? $options['descriptions'][0] : null;
 
-		$optionValuesList = explode(',', $options['optionValues']);
-		$options['optionValues'] = array();
-		foreach ($optionValuesList as $k7 => $v7) {
-			if (!$v7) continue;
-			$options['optionValues'] = $this->calcOptionValue($v7);
-		}
 		array_push($optionsArr, $options);
 		return $optionsArr;
 	}
@@ -165,7 +280,7 @@ class Product_model extends CI_Model
 		$optionValueArr = array();
 		$optionValues = $this->db->select('*')->get_where($this->tblOptionValue, array('id' => $id))->row_array();
 		$optionValues['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $optionValues['descriptions']);
-		$optionValues['description'] = count($optionValues['descriptions']) > 0 ? $optionValues['descriptions'][0] : null;
+		$optionValues['description'] = count($optionValues['descriptions']) > 0 && $optionValues['descriptions'][0] ? $optionValues['descriptions'][0] : null;
 		array_push($optionValueArr, $optionValues);
 		return $optionValueArr;
 	}
@@ -174,7 +289,7 @@ class Product_model extends CI_Model
 	{
 		$products = $this->db->select('id, descriptions, discounted, finalPrice, originalPrice')->get_where($this->tblProducts, array('id' => $pData['id']))->row_array();
 		$products['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $products['descriptions']);
-		$products['description'] = count($products['descriptions']) > 0 ? $products['descriptions'][0] : null;
+		$products['description'] = count($products['descriptions']) > 0 && $products['descriptions'][0] ? $products['descriptions'][0] : null;
 		return $products;
 	}
 
@@ -209,17 +324,8 @@ class Product_model extends CI_Model
 		$options = $this->db->select('*')->limit($count, $count * $page)->get_where($this->tblOptions, array('store' => $store))->result_array();
 		foreach ($options as $k5 => $v5) {
 			if (!$v5) continue;
-
 			$options[$k5]['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $options[$k5]['descriptions']);
-
-			$optionValuesList = explode(',', $v5['optionValues']);
-			$options[$k5]['optionValues'] = array();
-			foreach ($optionValuesList as $k7 => $v7) {
-				if (!$v7) continue;
-				$optionValues = $this->db->select('*')->get_where($this->tblOptionValue, array('id' => $v7))->row_array();
-				$optionValues['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $optionValues['descriptions']);
-				array_push($options[$k5]['optionValues'], $optionValues);
-			}
+			$options[$k5]['description'] = count($options[$k5]['descriptions']) > 0 && $options[$k5]['descriptions'][0] ? $options[$k5]['descriptions'][0] : null;
 		}
 		return $options;
 	}
@@ -228,15 +334,7 @@ class Product_model extends CI_Model
 	{
 		$options = $this->db->select('*')->limit($count)->get_where($this->tblOptions, array('id' => $id))->row_array();
 		$options['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $options['descriptions']);
-
-		$optionValuesList = explode(',', $options['optionValues']);
-		$options['optionValues'] = array();
-		foreach ($optionValuesList as $v7) {
-			if (!$v7) continue;
-			$optionValues = $this->db->select('*')->get_where($this->tblOptionValue, array('id' => $v7))->row_array();
-			$optionValues['description'] = $this->db->select('*')->get_where($this->tblDescription, array('id' => $optionValues['description']))->row_array();
-			array_push($options['optionValues'], $optionValues);
-		}
+		$options['description'] = count($options['descriptions']) > 0 && $options['descriptions'][0] ? $options['descriptions'][0] : null;
 		return $options;
 	}
 
@@ -245,7 +343,7 @@ class Product_model extends CI_Model
 		$descriptions = '';
 		foreach ($pData['descriptions'] as $k => $v) {
 			unset($v['id']);
-			$this->db->insert($this->tblDescription, array('language' => $v['language'], 'name' => $v['name']));
+			$this->db->insert($this->tblDescription, $v);
 			$insertId = $this->db->insert_id();
 			$descriptions = $descriptions . $insertId . ',';
 		}
@@ -257,8 +355,7 @@ class Product_model extends CI_Model
 			'type' => $pData['type'],
 			'descriptions' => $descriptions,
 		);
-		$this->db->where($where);
-		$this->db->update($this->tblOptions, $data);
+		$this->db->where($where)->update($this->tblOptions, $data);
 		return true;
 	}
 
@@ -267,7 +364,7 @@ class Product_model extends CI_Model
 		$descriptions = '';
 		foreach ($pData['descriptions'] as $k => $v) {
 			unset($v['id']);
-			$this->db->insert($this->tblDescription, array('language' => $v['language'], 'name' => $v['name']));
+			$this->db->insert($this->tblDescription, $v);
 			$insertId = $this->db->insert_id();
 			$descriptions = $descriptions . $insertId . ',';
 		}
@@ -288,25 +385,41 @@ class Product_model extends CI_Model
 	function get_Attributes($productId, $count, $store, $lang, $page)
 	{
 		$attributes = $this->db->select('*')->get($this->tblAttributes, $count, $count * $page)->result_array();
+		foreach ($attributes as $k => $v) {
+			$attributes[$k]['option'] = $this->get_OptionsById(null, $v['option']);
+			$attributes[$k]['optionValue'] = $this->get_OptionValueById(null, null, $v['optionValue']);
+		}
 		return $attributes;
 	}
 
-	function get_OptionValues($count, $store, $lang, $page)
+	function createAttribute($pData, $productId)
+	{
+		$optionId = $this->db->select('*')->get_where($this->tblOptions, array('code' => $pData['option']['code']))->row_array()['id'];
+		$optionValueId = $this->db->select('*')->get_where($this->tblOptionValue, array('code' => $pData['optionValue']['code']))->row_array()['id'];
+		$pData['option'] = $optionId;
+		$pData['optionValue'] = $optionValueId;
+		$this->db->insert($this->tblAttributes, $pData);
+		$insertId = $this->db->insert_id();
+		return array('id' => $insertId);
+	}
+
+	function get_OptionValues($count = null, $store = null, $lang = null, $page = null)
 	{
 		$optionValues = $this->db->select('*')->limit($count, $count * $page)->get_where($this->tblOptionValue, array('store' => $store))->result_array();
 		foreach ($optionValues as $k5 => $v5) {
 			if (!$v5) continue;
 			$optionValues[$k5]['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $optionValues[$k5]['descriptions']);
+			$optionValues[$k5]['description'] = count($optionValues[$k5]['descriptions']) > 0 && $optionValues[$k5]['descriptions'][0] ? $optionValues[$k5]['descriptions'][0] : null;
 		}
 		return $optionValues;
 	}
 
-	function createValueOption($pData)
+	function createOptionValue($pData)
 	{
 		$descriptions = '';
 		foreach ($pData['descriptions'] as $k => $v) {
 			unset($v['id']);
-			$this->db->insert($this->tblDescription, array('language' => $v['language'], 'name' => $v['name']));
+			$this->db->insert($this->tblDescription, $v);
 			$insertId = $this->db->insert_id();
 			$descriptions = $descriptions . $insertId . ',';
 		}
@@ -328,7 +441,7 @@ class Product_model extends CI_Model
 		$enName = $pData['descriptions'][0]['name'];
 		foreach ($pData['descriptions'] as $k => $v) {
 			unset($v['id']);
-			$this->db->insert($this->tblDescription, array('language' => $v['language'], 'name' => $v['name']));
+			$this->db->insert($this->tblDescription, $v);
 			$insertId = $this->db->insert_id();
 			$descriptions = $descriptions . $insertId . ',';
 		}
@@ -350,13 +463,14 @@ class Product_model extends CI_Model
 	{
 		$optionValues = $this->db->select('*')->limit($count)->get_where($this->tblOptionValue, array('id' => $id))->row_array();
 		$optionValues['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $optionValues['descriptions']);
+		$optionValues['description'] = count($optionValues['descriptions']) > 0 && $optionValues['descriptions'][0] ? $optionValues['descriptions'][0] : null;
 		return $optionValues;
 	}
 
-	function createImage($optionValueId, $target_file)
+	function createImage($file_name, $encodedImage, $id)
 	{
-		$this->db->where(array('id' => $optionValueId));
-		$this->db->update($this->tblOptionValue, array('image' => $target_file));
+		$this->db->where(array('id' => $id));
+		$this->db->update($this->tblOptionValue, array('image' => $encodedImage));
 		return true;
 	}
 
@@ -365,28 +479,22 @@ class Product_model extends CI_Model
 		$properties = $this->db->select('*')->get($this->tblProperty)->result_array();
 		foreach ($properties as $k5 => $v5) {
 			if (!$v5) continue;
-			$properties[$k5]['option'] = $this->db->select('*')->get_where($this->tblOptions, array('id' => $v5['option']))->row_array();
-			if ($properties[$k5]['option']) {
-				$descs = $properties[$k5]['option']['descriptions'];
-				$values = $properties[$k5]['option']['optionValues'];
-			} else {
-				$descs = null;
-				$values = null;
-			}
-			$properties[$k5]['option']['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $descs);
-			$properties[$k5]['option']['optionValues'] = GetTableDetails($this, $this->tblOptionValue, 'id', $values);
-			foreach ($properties[$k5]['option']['optionValues'] as $k1 => $v1) {
-				$properties[$k5]['option']['optionValues'][$k1]['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $v1['descriptions']);
-			}
+
+			$options = GetTableDetails($this, $this->tblOptions, 'id', $properties[$k5]['option']);
+			$properties[$k5]['option'] = $options[0];
+			$properties[$k5]['option']['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $properties[$k5]['option']['descriptions']);
+			$properties[$k5]['option']['description'] = count($properties[$k5]['option']['descriptions']) > 0 && $properties[$k5]['option']['descriptions'][0] ? $properties[$k5]['option']['descriptions'][0] : null;
 
 			$properties[$k5]['optionValues'] = GetTableDetails($this, $this->tblOptionValue, 'id', $properties[$k5]['optionValues']);
 			foreach ($properties[$k5]['optionValues'] as $k2 => $v2) {
 				$properties[$k5]['optionValues'][$k2]['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $v2['descriptions']);
+				$properties[$k5]['optionValues'][$k2]['description'] = count($properties[$k5]['optionValues'][$k2]['descriptions']) > 0 && $properties[$k5]['optionValues'][$k2]['descriptions'][0] ? $properties[$k5]['optionValues'][$k2]['descriptions'][0] : null;
 			}
 
 			$properties[$k5]['productTypes'] = GetTableDetails($this, $this->tblOptionValue, 'id', $properties[$k5]['productTypes']);
 			foreach ($properties[$k5]['productTypes'] as $k3 => $v3) {
-				$properties[$k5]['productTypes'][$k3]['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $v2['descriptions']);
+				$properties[$k5]['productTypes'][$k3]['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $v3['descriptions']);
+				$properties[$k5]['productTypes'][$k3]['description'] = count($properties[$k5]['productTypes'][$k3]['descriptions']) > 0 && $properties[$k5]['productTypes'][$k3]['descriptions'][0] ? $properties[$k5]['productTypes'][$k3]['descriptions'][0] : null;
 			}
 		}
 		return $properties;
@@ -414,13 +522,22 @@ class Product_model extends CI_Model
 		return true;
 	}
 
-	function get_PropertyValueById($id, $lang, $store)
+	function get_PropertyValueById($id = null, $lang = null, $store = null)
 	{
 		$property = $this->db->select('*')->get_where($this->tblProperty, array('id' => $id))->row_array();
-		$property['option'] = $this->db->select('*')->get_where($this->tblOptions, array('id' => $property['option']))->row_array();
-		$property['option']['optionValues'] = GetTableDetails($this, $this->tblOptionValue, 'id', $property['option']['optionValues']);
+		$property['option'] = $this->get_OptionsById(null, $property['option']);
+
 		$property['optionValues'] = GetTableDetails($this, $this->tblOptionValue, 'id', $property['optionValues']);
-		$property['productTypes'] = GetTableDetails($this, $this->tblPropertyType, 'id', $property['productTypes']);
+		foreach ($property['optionValues'] as $k3 => $v3) {
+			$property['optionValues'][$k3]['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $v3['descriptions']);
+			$property['optionValues'][$k3]['description'] = count($property['optionValues'][$k3]['descriptions']) > 0 && $property['optionValues'][$k3]['descriptions'][0] ? $property['optionValues'][$k3]['descriptions'][0] : null;
+		}
+
+		$property['productTypes'] = GetTableDetails($this, $this->tblOptionValue, 'id', $property['productTypes']);
+		foreach ($property['productTypes'] as $k2 => $v2) {
+			$property['productTypes'][$k2]['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $v2['descriptions']);
+			$property['productTypes'][$k2]['description'] = count($property['optionValues'][$k2]['descriptions']) > 0 && $property['productTypes'][$k2]['descriptions'][0] ? $property['optionValues'][$k2]['descriptions'][0] : null;
+		}
 		return $property;
 	}
 
@@ -457,10 +574,11 @@ class Product_model extends CI_Model
 			if (!$v1) continue;
 			$variations[$k1]['optionValue'] = $this->db->select('*')->get_where($this->tblOptionValue, array('id' => $v1['optionValue']))->row_array();
 			$variations[$k1]['optionValue']['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $variations[$k1]['optionValue']['descriptions']);
+			$variations[$k1]['optionValue']['description'] = count($variations[$k1]['optionValue']['descriptions']) > 0 && $variations[$k1]['optionValue']['descriptions'][0] ? $variations[$k1]['optionValue']['descriptions'][0] : null;
 
 			$variations[$k1]['option'] = $this->db->select('*')->get_where($this->tblOptions, array('id' => $v1['option']))->row_array();
 			$variations[$k1]['option']['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $variations[$k1]['option']['descriptions']);
-			$variations[$k1]['option']['optionValues'] = GetTableDetails($this, $this->tblOptionValue, 'id', $variations[$k1]['option']['optionValues']);
+			$variations[$k1]['option']['description'] = count($variations[$k1]['option']['descriptions']) > 0 && $variations[$k1]['option']['descriptions'][0] ? $variations[$k1]['option']['descriptions'][0] : null;
 		}
 		return $variations;
 	}
@@ -612,6 +730,14 @@ class Product_model extends CI_Model
 		$data = array('active' => (int)$pData['active']);
 		$this->db->where($where)->update($this->tblProductGroups, $data);
 		return true;
+	}
+
+	function getTypeById($id = null, $lang = null, $store = null)
+	{
+		$types = $this->db->select('*')->get_where($this->tblPropertyType, array('id' => $id))->row_array();
+		$types['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $types['descriptions']);
+		$types['description'] = count($types['descriptions']) > 0 && $types['descriptions'][0] ? $types['descriptions'][0] : null;
+		return $types;
 	}
 
 	function createType($pData)

@@ -11,7 +11,7 @@ class Cart_model extends CI_Model
 	public $tblImage = 'tbl_image';
 	public $tblManufacturer = 'tbl_manufacturer';
 	public $tblOptions = 'tbl_options';
-	public $tblOptionValues = 'tbl_option_value';
+	public $tblOptionValues = 'tbl_option_values';
 	public $tblProductPrice = 'tbl_product_price';
 	public $tblProductSpecification = 'tbl_product_specification';
 	public $tblProperties = 'tbl_properties';
@@ -50,7 +50,7 @@ class Cart_model extends CI_Model
 		}
 		// Description
 		$product['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $product['descriptions']);
-		$product['description'] = count($product['descriptions']) > 0 ? $product['descriptions'][0] : null;
+		$product['description'] = count($product['descriptions']) > 0 && $product['descriptions'][0] ? $product['descriptions'][0] : null;
 
 		// Image
 		$product['image'] = $this->db->select('*')->get_where($this->tblImage, array('id' => $product['image']))->row_array();
@@ -66,7 +66,7 @@ class Cart_model extends CI_Model
 		// Manufacturer
 		$manufacturer = $this->db->select('*')->get_where($this->tblManufacturer, array('id' => $product['manufacturer']))->row_array();
 		$manufacturer['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $manufacturer['descriptions']);
-		$manufacturer['description'] = count($manufacturer['descriptions']) > 0 ? $manufacturer['descriptions'][0] : null;
+		$manufacturer['description'] = count($manufacturer['descriptions']) > 0 && $manufacturer['descriptions'][0] ? $manufacturer['descriptions'][0] : null;
 		$product['manufacturer'] = $manufacturer;
 
 		// Options
@@ -81,7 +81,7 @@ class Cart_model extends CI_Model
 				if (!$v7) continue;
 				$optionValues = $this->db->select('*')->get_where($this->tblOptionValues, array('id' => $v7))->row_array();
 				$optionValues['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $optionValues['descriptions']);
-				$optionValues['description'] = count($optionValues['descriptions']) > 0 ? $optionValues['descriptions'][0] : null;
+				$optionValues['description'] = count($optionValues['descriptions']) > 0 && $optionValues['descriptions'][0] ? $optionValues['descriptions'][0] : null;
 				array_push($options['optionValues'], $optionValues);
 			}
 			array_push($product['options'], $options);
@@ -112,7 +112,7 @@ class Cart_model extends CI_Model
 		// Type
 		$type = $this->db->select('*')->get_where($this->tblPropertyType, array('id' => $product['type']))->row_array();
 		$type['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $type['descriptions']);
-		$type['description'] = count($type['descriptions']) > 0 ? $type['descriptions'][0] : null;
+		$type['description'] = count($type['descriptions']) > 0 && $type['descriptions'][0] ? $type['descriptions'][0] : null;
 		$product['type'] = $type;
 
 		return $product;

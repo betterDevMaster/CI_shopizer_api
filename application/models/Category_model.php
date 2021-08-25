@@ -8,7 +8,7 @@ class Category_model extends CI_Model
 	public $tblDescription = 'tbl_description';
 	public $tblManufacturer = 'tbl_manufacturer';
 	public $tblOptions = 'tbl_options';
-	public $tblOptionValues = 'tbl_option_value';
+	public $tblOptionValues = 'tbl_option_values';
 
 	public function __construct()
 	{
@@ -29,7 +29,8 @@ class Category_model extends CI_Model
 		}
 
 		for ($i = 0; $i < count($category); $i++) {
-			$category[$i]['description'] = $this->db->select('*')->get_where($this->tblDescription, array('id' => $category[$i]['description']))->row_array();
+			$category[$i]['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $category[$i]['descriptions']);
+			$category[$i]['description'] = count($category[$i]['descriptions']) > 0 && $category[$i]['descriptions'][0] ? $category[$i]['descriptions'][0] : null;
 			$category[$i]['parent'] = $this->db->select('id, code')->get_where($this->tblCategories, array('id' => $category[$i]['parent']))->row_array();
 			$category[$i]['children'] = $this->get_CategoryDetail($category[$i]['children'],  $store, $lang);
 		}
@@ -66,25 +67,18 @@ class Category_model extends CI_Model
 
 	function updateCategory($pData)
 	{
-		if (count($pData['descriptions']) > 0) {
-			$insertData = array(
-				'description' => $pData['descriptions'][0]['description'],
-				'friendlyUrl' => $pData['descriptions'][0]['friendlyUrl'],
-				'highlights' => $pData['descriptions'][0]['highlights'],
-				'language' => $pData['descriptions'][0]['language'],
-				'metaDescription' => $pData['descriptions'][0]['metaDescription'],
-				'name' => $pData['descriptions'][0]['name'],
-				'title' => $pData['descriptions'][0]['title'],
-			);
-
-			$this->db->insert($this->tblDescription, $insertData);
+		$descriptions = '';
+		foreach ($pData['descriptions'] as $k => $v) {
+			unset($v['id']);
+			$this->db->insert($this->tblDescription, $v);
 			$insertId = $this->db->insert_id();
+			$descriptions = $descriptions . $insertId . ',';
 		}
 
 		$where = array('id' => $pData['id']);
 		$data = array(
 			'code' => $pData['code'],
-			'description' => $insertId,
+			'descriptions' => $descriptions,
 			'parent' => $pData['parent']['id'],
 			'sortOrder' => $pData['sortOrder'],
 			'store' => $pData['store'],
@@ -96,24 +90,17 @@ class Category_model extends CI_Model
 
 	function addCategory($pData)
 	{
-		if (count($pData['descriptions']) > 0) {
-			$insertData = array(
-				'description' => $pData['descriptions'][0]['description'],
-				'friendlyUrl' => $pData['descriptions'][0]['friendlyUrl'],
-				'highlights' => $pData['descriptions'][0]['highlights'],
-				'language' => $pData['descriptions'][0]['language'],
-				'metaDescription' => $pData['descriptions'][0]['metaDescription'],
-				'name' => $pData['descriptions'][0]['name'],
-				'title' => $pData['descriptions'][0]['title'],
-			);
-
-			$this->db->insert($this->tblDescription, $insertData);
+		$descriptions = '';
+		foreach ($pData['descriptions'] as $k => $v) {
+			unset($v['id']);
+			$this->db->insert($this->tblDescription, $v);
 			$insertId = $this->db->insert_id();
+			$descriptions = $descriptions . $insertId . ',';
 		}
 
 		$data = array(
 			'code' => $pData['code'],
-			'description' => $insertId,
+			'descriptions' => $descriptions,
 			'parent' => $pData['parent']['id'],
 			'sortOrder' => $pData['sortOrder'],
 			'store' => isset($pData['store']) ? $pData['store'] : 'DEFAULT',
@@ -134,7 +121,7 @@ class Category_model extends CI_Model
 		$this->db->where($where)->update($this->tblCategories, $data);
 		return $pData;
 	}
-	
+
 	function moveCategory($pData)
 	{
 		$where = array('id' => $pData['childId']);

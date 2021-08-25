@@ -14,10 +14,13 @@ class Product extends REST_Controller
 	public $tblPropertyType = 'tbl_property_type';
 	public $tblManufacturer = 'tbl_manufacturer';
 	public $tblOptions = 'tbl_options';
-	public $tblOptionValue = 'tbl_option_value';
+	public $tblOptionValue = 'tbl_option_values';
 	public $tblProperty = 'tbl_property';
 	public $tblProductGroups = 'tbl_product_groups';
 	public $tblDescription = 'tbl_description';
+	public $tblProducts = 'tbl_products';
+	public $tblImage = 'tbl_image';
+	public $tblPropertyVariation = 'tbl_property_variation';
 
 	public function __construct()
 	{
@@ -64,6 +67,50 @@ class Product extends REST_Controller
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
+	public function uniqueProduct_get()
+	{
+		$where = array('identifier' => $_REQUEST['code']);
+		$response = $this->common->get_UniqueTableRecord($where, $this->tblProducts);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function deleteProduct_delete($id)
+	{
+		$response =	$this->common->delete_TableRecordWithCondition(array('id' => $id), $this->tblProducts);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function definition_post()
+	{
+		$response =	$this->product->createProduct($this->post());
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function definition_put()
+	{
+		$response =	$this->product->updateProduct($this->put());
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function addImage_post($id)
+	{
+		$response = array('status' => false, 'message' => 'image open failed');
+		if (isset($_FILES['file'])) {
+			$file_tmp = $_FILES['file']['tmp_name'];
+			$data = file_get_contents($file_tmp);
+			$file_name = preg_replace('/\s+/', '', basename($_FILES["file"]["name"]));
+			$response =	$this->product->addImage($file_name, base64_encode($data), $id);
+			$this->response($response, REST_Controller::HTTP_OK);
+		} else
+			$this->response($response, REST_Controller::HTTP_NOT_FOUND);
+	}
+
+	public function removeImage_delete($productId, $imageId)
+	{
+		$this->product->removeImage($productId, $imageId);
+		$response =	$this->common->delete_TableRecordWithCondition(array('id' => $imageId), $this->tblImage);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
 
 	// Product / Options	
 	public function options_get()
@@ -123,6 +170,30 @@ class Product extends REST_Controller
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
+	public function attribute_post($productId)
+	{
+		$response  = $this->product->createAttribute($this->post(), $productId);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function attribute_get($productId, $attributeId)
+	{
+		$response  = $this->product->getAttributesById($this->post(), $productId);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function attributes_put($productId, $attributeId)
+	{
+		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
+		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
+		$productId = isset($_REQUEST['productId']) ? $_REQUEST['productId'] : 0;
+		$attributes  = $this->product->get_Attributes($productId, $count, $store, $lang, $page);
+		$response = array('attributes' => $attributes, 'number' => count($attributes), 'recordsFiltered' => 0, 'recordsTotal' => count($attributes), 'totalPages' => ceil(count($attributes) / $count));
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
 
 	// Product / optionValues	
 	public function optionValues_get()
@@ -157,7 +228,7 @@ class Product extends REST_Controller
 
 	public function createOptionValue_post()
 	{
-		$response = $this->product->createValueOption($this->post());
+		$response = $this->product->createOptionValue($this->post());
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
@@ -172,30 +243,15 @@ class Product extends REST_Controller
 
 	public function createImage_post($optionValueId = 0)
 	{
+		$response = array('status' => false, 'message' => 'image open failed');
 		if (isset($_FILES['file'])) {
-			$target_dir = "assets/optionValue/";
 			$file_tmp = $_FILES['file']['tmp_name'];
 			$data = file_get_contents($file_tmp);
 			$file_name = preg_replace('/\s+/', '', basename($_FILES["file"]["name"]));
-
-			$target_file = $target_dir . $file_name;
-
-			if (!file_exists($target_dir)) {
-				mkdir($target_dir, 0777, true);
-			}
-
-			if (!file_exists($target_file)) {
-				if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
-					$this->product->createImage($optionValueId, $target_file);
-					$response = array('status' => true, 'msg' => 'Image uploaded to Server');
-				} else {
-					$response = array('status' => false, 'msg' => 'Image cannot upload to the server');
-				}
-			} else {
-				$response = array('status' => true, 'msg' => 'Image uploaded to Server');
-			}
-		}
-		$this->response($response, REST_Controller::HTTP_OK);
+			$this->product->createImage($file_name, base64_encode($data), $optionValueId);
+			$this->response($response, REST_Controller::HTTP_OK);
+		} else
+			$this->response($response, REST_Controller::HTTP_NOT_FOUND);
 	}
 
 	public function deleteImage_delete()
@@ -258,11 +314,16 @@ class Product extends REST_Controller
 
 	public function getType_get($id)
 	{
+		// $lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		// $store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
+		// $response  = $this->common->get_TableContentWithRowResultAndCondition(array('id' => $id), $this->tblPropertyType);
+		// $response['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $response['descriptions']);
+		// $response['description'] = count($response['descriptions']) > 0 && $response['descriptions'][0] ? $response['descriptions'][0] : null;
+		// $this->response($response, REST_Controller::HTTP_OK);
+
 		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
-		$response  = $this->common->get_TableContentWithRowResultAndCondition(array('id' => $id), $this->tblPropertyType);
-		$response['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $response['descriptions']);
-		$response['description'] = count($response['descriptions']) > 0 ? $response['descriptions'][0] : null;
+		$response  = $this->product->getTypeById($id, $lang, $store);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
@@ -295,7 +356,7 @@ class Product extends REST_Controller
 	public function uniqueVariation_get()
 	{
 		$where = array('code' => $_REQUEST['code']);
-		$response = $this->common->get_UniqueTableRecord($where, $this->tblProperty);
+		$response = $this->common->get_UniqueTableRecord($where, $this->tblPropertyVariation);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
@@ -312,6 +373,12 @@ class Product extends REST_Controller
 	public function createVariation_post()
 	{
 		$response = $this->product->createVariation($this->post());
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function deleteVariation_delete($id)
+	{
+		$response =	$this->common->delete_TableRecordWithCondition(array('id' => $id), $this->tblPropertyVariation);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 

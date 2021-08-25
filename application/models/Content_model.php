@@ -17,7 +17,7 @@ class Content_model extends CI_Model
 	{
 		$content = $this->db->select('*')->get($this->tblContent)->row_array();
 		$content['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $content['descriptions']);
-		$content['description'] = count($content['descriptions']) > 0 ? $content['descriptions'][0] : null;
+		$content['description'] = count($content['descriptions']) > 0 && $content['descriptions'][0] ? $content['descriptions'][0] : null;
 		return $content;
 	}
 
@@ -34,7 +34,7 @@ class Content_model extends CI_Model
 		foreach ($contents as $k1 => $v1) {
 			if (!$v1) continue;
 			$contents[$k1]['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $v1['descriptions']);
-			$contents[$k1]['description'] = count($contents[$k1]['descriptions']) > 0 ? $contents[$k1]['descriptions'][0] : null;
+			$contents[$k1]['description'] = count($contents[$k1]['descriptions']) > 0 && $contents[$k1]['descriptions'][0] ? $contents[$k1]['descriptions'][0] : null;
 			// foreach ($contents[$k1]['descriptions'] as $k2 => $v2) {
 			// 	if ($v2['language'] == $lang || $lang == '_all') {
 			// 		$contents[$k1]['description'] = $v2;
@@ -66,7 +66,7 @@ class Content_model extends CI_Model
 
 		$contents = $this->db->select('*')->get_where($this->tblContent, $where)->row_array();
 		$contents['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $contents['descriptions']);
-		$contents['description'] = count($contents['descriptions']) > 0 ? $contents['descriptions'][0] : null;
+		$contents['description'] = count($contents['descriptions']) > 0 && $contents['descriptions'][0] ? $contents['descriptions'][0] : null;
 		return $contents;
 	}
 

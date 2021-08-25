@@ -206,6 +206,7 @@ class Module_model extends CI_Model
 				foreach ($contents as $k5 => $v5) {
 					if (!$v5) continue;
 					$contents[$k5]['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $contents[$k5]['descriptions']);
+					$contents[$k5]['description'] = count($contents[$k5]['descriptions']) > 0 && $contents[$k5]['descriptions'][0] ? $contents[$k5]['descriptions'][0] : null;
 				}
 			}
 
@@ -217,6 +218,7 @@ class Module_model extends CI_Model
 				$result = $this->db->get_where($table, array('id' => $code))->row_array();
 				$result['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $result['descriptions']);
 				$result['description'] = count($result['descriptions']) > 0 ? $result['descriptions'][0] : null;
+				$result['description'] = count($result['descriptions']) > 0 && $result['descriptions'][0] ? $result['descriptions'][0] : null;
 			}
 		}
 		return $result;
