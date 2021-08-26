@@ -15,24 +15,19 @@ class Category_model extends CI_Model
 		parent::__construct();
 	}
 
-	function get_CategoryDetail($id, $store, $lang, $count = null, $page = null, $filter = null, $code = null)
+	function get_CategoryDetail($id = null, $code = null, $store = null, $lang = null, $count = null, $page = null, $filter = null)
 	{
-		if (!$filter)
-			$category = $this->db->select('*')->limit($count, $count * $page)->get_where($this->tblCategories, array('id' => $id))->result_array();
-		else {
-			if (!$code)
-				$category = $this->db->select('*')->get($this->tblCategories, $count, $count * $page)->result_array();
-			else {
-				$this->db->where("code LIKE '%$code%'");
-				$category = $this->db->get($this->tblCategories, $count, $count * $page)->result_array();
-			}
+		$category = $this->db->select('*')->get_where($this->tblCategories, array('parent' => $id))->result_array();
+		if ($code) {
+			$this->db->where("code LIKE '%$code%'");
+			$category = $this->db->select('*')->get_where($this->tblCategories, array('parent' => $id))->result_array();
 		}
 
 		for ($i = 0; $i < count($category); $i++) {
 			$category[$i]['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $category[$i]['descriptions']);
 			$category[$i]['description'] = count($category[$i]['descriptions']) > 0 && $category[$i]['descriptions'][0] ? $category[$i]['descriptions'][0] : null;
 			$category[$i]['parent'] = $this->db->select('id, code')->get_where($this->tblCategories, array('id' => $category[$i]['parent']))->row_array();
-			$category[$i]['children'] = $this->get_CategoryDetail($category[$i]['children'],  $store, $lang);
+			$category[$i]['children'] = $this->get_CategoryDetail($category[$i]['id']);
 		}
 		return $category;
 	}
@@ -124,12 +119,11 @@ class Category_model extends CI_Model
 
 	function moveCategory($pData)
 	{
+		// Child - Parent
 		$where = array('id' => $pData['childId']);
 		$data = array(
-			'parent' => $pData['parentId'] == '-1' ? null : $pData['parentId'],
+			'parent' => $pData['parentId'] == '-1' ? 0 : $pData['parentId'],
 		);
-		var_dump($where);
-		var_dump($data);
 		$this->db->where($where)->update($this->tblCategories, $data);
 		return true;
 	}

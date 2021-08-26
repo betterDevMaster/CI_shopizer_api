@@ -99,15 +99,15 @@ $query_builder = true;
 
 $db['default'] = array(
     'dsn' => '',
-    // 'hostname' => 'localhost',
-    // 'username' => 'root',
-    // 'password' => '',
-    // 'database' => 'shopizer',
+    'hostname' => 'localhost',
+    'username' => 'root',
+    'password' => '',
+    'database' => 'shopizer',
 
-    'hostname' => '192.185.110.227',
-	'username' => 'healthym_healthy',
-    'password' => 'healthy123',
-    'database' => 'healthym_shopizer',
+    // 'hostname' => '192.185.110.227',
+	// 'username' => 'healthym_healthy',
+    // 'password' => 'healthy123',
+    // 'database' => 'healthym_shopizer',
 
     'dbdriver' => 'mysqli',
     'dbprefix' => '',

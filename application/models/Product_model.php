@@ -392,6 +392,14 @@ class Product_model extends CI_Model
 		return $attributes;
 	}
 
+	function getAttributesById($productId, $attributeId)
+	{
+		$attribute = $this->db->select('*')->get_where($this->tblAttributes, array('id' => $attributeId))->row_array();
+		$attribute['option'] = $this->get_OptionsById(null, $attribute['option']);
+		$attribute['optionValue'] = $this->get_OptionValueById(null, null, $attribute['optionValue']);
+		return $attribute;
+	}
+
 	function createAttribute($pData, $productId)
 	{
 		$optionId = $this->db->select('*')->get_where($this->tblOptions, array('code' => $pData['option']['code']))->row_array()['id'];
@@ -401,6 +409,16 @@ class Product_model extends CI_Model
 		$this->db->insert($this->tblAttributes, $pData);
 		$insertId = $this->db->insert_id();
 		return array('id' => $insertId);
+	}
+
+	function updateAttribute($productId, $attributeId, $pData)
+	{
+		$optionId = $this->db->select('*')->get_where($this->tblOptions, array('code' => $pData['option']['code']))->row_array()['id'];
+		$optionValueId = $this->db->select('*')->get_where($this->tblOptionValue, array('code' => $pData['optionValue']['code']))->row_array()['id'];
+		$pData['option'] = $optionId;
+		$pData['optionValue'] = $optionValueId;
+		$this->db->where(array('id' => $attributeId))->update($this->tblAttributes, $pData);
+		return true;
 	}
 
 	function get_OptionValues($count = null, $store = null, $lang = null, $page = null)
@@ -474,7 +492,7 @@ class Product_model extends CI_Model
 		return true;
 	}
 
-	function get_Property($store, $lang)
+	function get_Property($store, $lang, $productType)
 	{
 		$properties = $this->db->select('*')->get($this->tblProperty)->result_array();
 		foreach ($properties as $k5 => $v5) {

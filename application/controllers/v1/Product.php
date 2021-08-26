@@ -21,6 +21,7 @@ class Product extends REST_Controller
 	public $tblProducts = 'tbl_products';
 	public $tblImage = 'tbl_image';
 	public $tblPropertyVariation = 'tbl_property_variation';
+	public $tblAttributes = 'tbl_attributes';
 
 	public function __construct()
 	{
@@ -178,22 +179,21 @@ class Product extends REST_Controller
 
 	public function attribute_get($productId, $attributeId)
 	{
-		$response  = $this->product->getAttributesById($this->post(), $productId);
+		$response  = $this->product->getAttributesById($productId, $attributeId);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
-	public function attributes_put($productId, $attributeId)
+	public function attribute_put($productId, $attributeId)
 	{
-		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
-		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
-		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
-		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
-		$productId = isset($_REQUEST['productId']) ? $_REQUEST['productId'] : 0;
-		$attributes  = $this->product->get_Attributes($productId, $count, $store, $lang, $page);
-		$response = array('attributes' => $attributes, 'number' => count($attributes), 'recordsFiltered' => 0, 'recordsTotal' => count($attributes), 'totalPages' => ceil(count($attributes) / $count));
+		$response  = $this->product->updateAttribute($productId, $attributeId, $this->put());
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
+	public function attribute_delete($productId, $attributeId)
+	{
+		$response =	$this->common->delete_TableRecordWithCondition(array('id' => $attributeId), $this->tblAttributes);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
 
 	// Product / optionValues	
 	public function optionValues_get()
@@ -273,7 +273,8 @@ class Product extends REST_Controller
 	{
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
 		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
-		$response  = $this->product->get_Property($store, $lang);
+		$productType = isset($_REQUEST['productType']) ? $_REQUEST['productType'] : 'TEST';
+		$response  = $this->product->get_Property($store, $lang, $productType);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
