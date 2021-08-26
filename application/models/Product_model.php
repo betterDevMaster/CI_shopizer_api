@@ -49,8 +49,7 @@ class Product_model extends CI_Model
 						$this->db->or_where("manufacturer LIKE '%$v%'");
 					}
 				}
-				$this->db->where("categories LIKE '%$category%'");
-				$products = $this->db->get($this->tblProducts)->result_array();
+				$products = $this->db->get_where($this->tblProducts, array('category'=> $category))->result_array();
 			}
 		} else {
 			$products = $this->db->select('*')->get_where($this->tblProducts, array('id' => $productId))->result_array();
@@ -59,20 +58,12 @@ class Product_model extends CI_Model
 		foreach ($products as $k1 => $v1) {
 			if (!$v1['attributes']) $products[$k1]['attributes'] = array();
 
-			// Categories
-			$categoryList = explode(',', $v1['categories']);
-			$products[$k1]['categories'] = array();
-			foreach ($categoryList as $k2 => $v2) {
-				if (!$v2) continue;
-				$categories = $this->db->select('*')->get_where($this->tblCategories, array('id' => $v2))->row_array();
-				if ($categories) {
-					$categories['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $categories['descriptions']);
-					$categories['description'] = count($categories['descriptions']) > 0 && $categories['descriptions'][0] ? $categories['descriptions'][0] : null;
-					array_push($products[$k1]['categories'], $categories);
-				} else {
-					// $products[$k1]['categories'] = null;
-				}
-			}
+			// Category
+			$category = $this->db->select('*')->get_where($this->tblCategories, array('id' => $v1['category']))->row_array();
+			$category['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $category['descriptions']);
+			$category['description'] = count($category['descriptions']) > 0 && $category['descriptions'][0] ? $category['descriptions'][0] : null;
+			// array_push($products[$k1]['category'], $category);
+			$products[$k1]['category'] = $category;
 
 			// CartItemattributes
 			$products[$k1]['cartItemattributes'] = GetTableDetails($this, $this->tblCartItemAttributes, 'id', $products[$k1]['cartItemattributes']);
@@ -223,8 +214,10 @@ class Product_model extends CI_Model
 			'dateAvailable' => $pData['dateAvailable'],
 			'descriptions' => $descriptions,
 			'displaySubTotal' => $pData['displaySubTotal'],
+			'finalPrice' => $pData['price'],
 			'identifier' => $pData['identifier'],
 			'manufacturer' => (int)$manufacturerId,
+			'originalPrice' => $pData['price'],
 			'price' => $pData['price'],
 			'productSpecifications' => $productSpecificationId,
 			'quantity' => $pData['quantity'],
@@ -232,6 +225,12 @@ class Product_model extends CI_Model
 			'visible' => $pData['visible'],
 		);
 		$this->db->where(array('identifier' => $pData['identifier']))->update($this->tblProducts, $data);
+		return true;
+	}
+
+	function updateProductCategory($productId, $categoryId)
+	{
+		$this->db->where(array('id' => $productId))->update($this->tblProducts, array('category' => $categoryId));
 		return true;
 	}
 
@@ -293,10 +292,10 @@ class Product_model extends CI_Model
 		return $products;
 	}
 
-	function get_ProductList($pData)
+	function getProductList($count, $store, $lang, $page, $categoryId, $manufacturerId)
 	{
-		$manufacturer = IsNullOrEmptyString($pData['manufacturer']) ? '' : $pData['manufacturer'] . ',';
-		$product = $this->get_FeaturedItem($pData['store'], $pData['lang'], $pData['category'] . ',', $manufacturer);
+		$manufacturer = IsNullOrEmptyString($manufacturerId) ? null : $manufacturerId;
+		$product = $this->get_FeaturedItem($store, $lang, $categoryId, $manufacturer);
 		return $product;
 	}
 
@@ -304,18 +303,18 @@ class Product_model extends CI_Model
 	{
 		$store = isset($pData['store']) ? $pData['store'] : 'DEFAULT';
 		$lang = isset($pData['lang']) ? $pData['lang'] : 'en';
-		$product = $this->get_FeaturedItem($store, $lang, null, '', $pData['id']);
+		$product = $this->get_FeaturedItem($store, $lang, null, null, $pData['id']);
 		return $product;
 	}
 
 	function get_ProductReview($pData)
 	{
 		$reviews = $this->db->select('*')->get_where($this->tblReview, array('productId' => $pData['productId']))->result_array();
-		foreach ($reviews as $k => $v) {
-			$reviews[$k]['customer'] = $this->db->select('*')->get_where($this->tblProperties, array('id' => $pData['userId']))->row_array();
-			$reviews[$k]['customer']['billing'] = $this->db->select('*')->get_where($this->tblUserBilling, array('userId' => $pData['userId']))->row_array();
-			$reviews[$k]['customer']['delivery'] = $this->db->select('*')->get_where($this->tblUserDelivery, array('userId' => $pData['userId']))->row_array();
-		}
+		// foreach ($reviews as $k => $v) {
+		// 	$reviews[$k]['customer'] = $this->db->select('*')->get_where($this->tblProperties, array('id' => $pData['userId']))->row_array();
+		// 	$reviews[$k]['customer']['billing'] = $this->db->select('*')->get_where($this->tblUserBilling, array('userId' => $pData['userId']))->row_array();
+		// 	$reviews[$k]['customer']['delivery'] = $this->db->select('*')->get_where($this->tblUserDelivery, array('userId' => $pData['userId']))->row_array();
+		// }
 		return $reviews;
 	}
 
@@ -612,34 +611,21 @@ class Product_model extends CI_Model
 		return true;
 	}
 
-
-	function get_Manufacturers($store, $lang, $page, $count)
+	function getManufacturers($store, $lang, $page, $count)
 	{
-		$manufacturers = $this->db->select('*')->get($this->tblManufacturer)->result_array();
-		foreach ($manufacturers as $k1 => $v1) {
-			if (!$v1) continue;
-			$manufacturers[$k1]['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $v1['descriptions']);
-			foreach ($manufacturers[$k1]['descriptions'] as $k2 => $v2) {
-				if ($v2['language'] == $lang) {
-					$manufacturers[$k1]['description'] = $v2;
-					break;
-				}
-			}
+		$manufacturers = $this->db->get($this->tblManufacturer)->result_array();
+		for ($i = 0; $i < count($manufacturers); $i++) {
+			$manufacturers[$i]['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $manufacturers[$i]['descriptions']);
+			$manufacturers[$i]['description'] = count($manufacturers[$i]['descriptions']) > 0 && $manufacturers[$i]['descriptions'][0] ? $manufacturers[$i]['descriptions'][0] : null;
 		}
 		return $manufacturers;
 	}
 
-	function get_ManufacturerById($id, $lang)
+	function getManufacturerById($id, $lang)
 	{
 		$manufacturer = $this->db->select('*')->get_where($this->tblManufacturer, array('id' => $id))->row_array();
 		$manufacturer['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $manufacturer['descriptions']);
-
-		foreach ($manufacturer['descriptions'] as $k2 => $v2) {
-			if ($v2['language'] == $lang || $lang == '_all') {
-				$manufacturer['description'] = $v2;
-				break;
-			}
-		}
+		$manufacturer['description'] = count($manufacturer['descriptions']) > 0 && $manufacturer['descriptions'][0] ? $manufacturer['descriptions'][0] : null;
 		return $manufacturer;
 	}
 

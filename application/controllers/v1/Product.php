@@ -49,9 +49,15 @@ class Product extends REST_Controller
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
-	public function productList_post()
+	public function productList_get()
 	{
-		$products = $this->product->get_ProductList($this->post());
+		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 15;
+		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
+		$categoryId = isset($_REQUEST['category']) ? $_REQUEST['category'] : 0;
+		$manufacturerId = isset($_REQUEST['manufacturer']) ? $_REQUEST['manufacturer'] : null;
+		$products = $this->product->getProductList($count, $store, $lang, $page, $categoryId, $manufacturerId);
 		$response = array('number' => count($products), 'products' => $products, 'recordsFiltered' => 0, 'recordsTotal' => count($products),  'totalPages' => 1);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
@@ -90,6 +96,12 @@ class Product extends REST_Controller
 	public function definition_put()
 	{
 		$response =	$this->product->updateProduct($this->put());
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function productCategory_put($productId = null, $categoryId = null)
+	{
+		$response =	$this->product->updateProductCategory($productId, $categoryId);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
@@ -392,7 +404,7 @@ class Product extends REST_Controller
 		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
 		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
 
-		$manufacturers  = $this->product->get_Manufacturers($store, $lang, $page, $count);
+		$manufacturers  = $this->product->getManufacturers($store, $lang, $page, $count);
 		$response = array('number' => count($manufacturers), 'manufacturers' => $manufacturers, 'recordsFiltered' => 0, 'recordsTotal' => count($manufacturers),  'totalPages' => 1);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
@@ -400,7 +412,7 @@ class Product extends REST_Controller
 	public function getManufacturer_get($id)
 	{
 		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
-		$response  = $this->product->get_ManufacturerById($id, $lang);
+		$response  = $this->product->getManufacturerById($id, $lang);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 

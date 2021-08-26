@@ -35,7 +35,7 @@ class Category extends REST_Controller
 
 		// $categories = $this->category->get_Category(null, $store, $lang, $count, $page);
 
-		$categories = $this->category->get_CategoryDetail(0, $code, $store, $lang, $count, $page, $filter);
+		$categories = $this->category->getCategoryList(0, $code, $store, $lang, $count, $page, $filter);
 		$response = array(
 			'categories' => $categories, 'number' => count($categories), 'recordsFiltered' => 0, 'recordsTotal' => count($categories), 'totalPages' => ceil(count($categories) / $count)
 		);
@@ -47,19 +47,21 @@ class Category extends REST_Controller
 		$id = isset($_REQUEST['id']) ? $_REQUEST['id'] : 0;
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
 		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
-		$response = $this->category->get_CategoryDetail($id, null, $store, $lang);
-		$this->response($response[0], REST_Controller::HTTP_OK);
+		$response = $this->category->getCategoryDetailById($id, null, $store, $lang);
+		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
-	public function manufacturers_post()
+	public function manufacturers_get()
 	{
-		$response = $this->category->get_Manufacturers($this->post());
+		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$response = $this->category->getManufacturers($store, $lang);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
 	public function variants_post()
 	{
-		$response = $this->category->get_Variants($this->post());
+		$response = $this->category->getVariants($this->post());
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 

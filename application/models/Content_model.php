@@ -35,12 +35,6 @@ class Content_model extends CI_Model
 			if (!$v1) continue;
 			$contents[$k1]['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $v1['descriptions']);
 			$contents[$k1]['description'] = count($contents[$k1]['descriptions']) > 0 && $contents[$k1]['descriptions'][0] ? $contents[$k1]['descriptions'][0] : null;
-			// foreach ($contents[$k1]['descriptions'] as $k2 => $v2) {
-			// 	if ($v2['language'] == $lang || $lang == '_all') {
-			// 		$contents[$k1]['description'] = $v2;
-			// 		break;
-			// 	}
-			// }
 		}
 		$result = array($recordsTotal, $totalPages, $contents);
 		return $result;
