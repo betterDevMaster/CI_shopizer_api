@@ -40,15 +40,19 @@ class Content_model extends CI_Model
 		return $result;
 	}
 
-	function get_Category($page, $count, $store, $lang, $parentId)
+	function getCategory($page, $count, $store, $lang, $parentId)
 	{
 		$contents = $this->db->select('*')->get_where($this->tblCategories, array('parent' => $parentId))->result_array();
 		for ($i = 0; $i < count($contents); $i++) {
 			$contents[$i]['description'] = $this->db->select('*')->get_where($this->tblDescription, array('id' => $contents[$i]['description']))->row_array();
 			$contents[$i]['parent'] = $this->db->select('id, code')->get_where($this->tblCategories, array('id' => $contents[$i]['parent']))->row_array();
-			$contents[$i]['children'] = $this->get_Category($page, $count, $store, $lang, $contents[$i]['id']);
+			$contents[$i]['children'] = $this->getCategory($page, $count, $store, $lang, $contents[$i]['id']);
 		}
-		return $contents;
+
+		$recordsTotal = $this->db->from($this->tblCategories)->count_all_results();
+		$totalPages = ceil($recordsTotal / $count);
+		$result = array($recordsTotal, $totalPages, $contents);
+		return $result;
 	}
 
 	function get_PageDetail($pData, $box = false)
@@ -66,6 +70,8 @@ class Content_model extends CI_Model
 
 	function updatePage($pData, $id, $box = false)
 	{
+		DeleteDescriptionsInTableWithCondition($this, $this->tblContent, array('id' => $id));
+	
 		$descriptions = '';
 		foreach ($pData['descriptions'] as $k => $v) {
 			unset($v['id']);

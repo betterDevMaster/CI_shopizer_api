@@ -15,14 +15,27 @@ class Category_model extends CI_Model
 		parent::__construct();
 	}
 
-	function getCategoryList($id = null, $code = null, $store = null, $lang = null, $count = null, $page = null, $filter = null)
+	function getCategoryList($id = 0, $count = null, $page = null, $code = null, $store = null, $lang = null, $filter = null)
 	{
-		$category = $this->db->select('*')->get_where($this->tblCategories, array('parent' => $id))->result_array();
+		$category = $this->db->limit($count, $count * $page)->get($this->tblCategories)->result_array();
+		// $category = $this->db->limit($count, $count * $page)->get_where($this->tblCategories, array('parent' => $id))->result_array();
 		for ($i = 0; $i < count($category); $i++) {
 			$category[$i]['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $category[$i]['descriptions']);
 			$category[$i]['description'] = count($category[$i]['descriptions']) > 0 && $category[$i]['descriptions'][0] ? $category[$i]['descriptions'][0] : null;
 			$category[$i]['parent'] = $this->db->select('id, code')->get_where($this->tblCategories, array('id' => $category[$i]['parent']))->row_array();
-			$category[$i]['children'] = $this->getCategoryList($category[$i]['id']);
+			// $category[$i]['children'] = $this->getCategoryList($category[$i]['id'], $count, $page);
+		}
+		return $category;
+	}
+
+	function getCategoryHierarchyList($id = 0, $count = null, $page = null, $store = null, $lang = null)
+	{
+		$category = $this->db->get_where($this->tblCategories, array('parent' => $id))->result_array();
+		for ($i = 0; $i < count($category); $i++) {
+			$category[$i]['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $category[$i]['descriptions']);
+			$category[$i]['description'] = count($category[$i]['descriptions']) > 0 && $category[$i]['descriptions'][0] ? $category[$i]['descriptions'][0] : null;
+			$category[$i]['parent'] = $this->db->select('id, code')->get_where($this->tblCategories, array('id' => $category[$i]['parent']))->row_array();
+			$category[$i]['children'] = $this->getCategoryHierarchyList($category[$i]['id']);
 		}
 		return $category;
 	}
@@ -61,6 +74,8 @@ class Category_model extends CI_Model
 
 	function updateCategory($pData)
 	{
+		DeleteDescriptionsInTableWithCondition($this, $this->tblCategories, array('id' => $pData['id']));
+		
 		$descriptions = '';
 		foreach ($pData['descriptions'] as $k => $v) {
 			unset($v['id']);
@@ -78,6 +93,10 @@ class Category_model extends CI_Model
 			'store' => $pData['store'],
 			'visible' => $pData['visible'],
 		);
+
+		if (isset($pData['image']) && !$pData['image']) {
+			$data = $data + array('image' => null);
+		}
 		$this->db->where($where)->update($this->tblCategories, $data);
 		return $pData;
 	}
@@ -103,7 +122,14 @@ class Category_model extends CI_Model
 			'featured' => isset($pData['featured']) ? $pData['featured'] : false,
 		);
 		$this->db->insert($this->tblCategories, $data);
-		return $pData;
+		$id = $this->db->insert_id();
+		return array('id' => $id);
+	}
+
+	function addCategoryImage($file_name, $encodedImage, $id)
+	{
+		$this->db->where(array('id' => $id))->update($this->tblCategories, array('image' => $encodedImage));
+		return true;
 	}
 
 	function visible($pData)

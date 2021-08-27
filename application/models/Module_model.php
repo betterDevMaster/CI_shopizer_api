@@ -244,6 +244,8 @@ class Module_model extends CI_Model
 	function updateTaxModule($pData, $id, $table)
 	{
 		if ($table == $this->tblTaxRate) {
+			DeleteDescriptionsInTableWithCondition($this, $this->tblTaxRate, array('id' => $id));
+
 			$descriptions = '';
 			foreach ($pData['descriptions'] as $k => $v) {
 				unset($v['id']);

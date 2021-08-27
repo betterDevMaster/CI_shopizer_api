@@ -26,19 +26,29 @@ class Category extends REST_Controller
 
 	public function list_get()
 	{
-		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 100;
-		$filter = isset($_REQUEST['filter']) ? $_REQUEST['filter'] : 'admin';
+		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 20;
 		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
+		$filter = isset($_REQUEST['filter']) ? $_REQUEST['filter'] : 'admin';
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
 		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
 		$code = isset($_REQUEST['code']) ? $_REQUEST['code'] : '';
 
-		// $categories = $this->category->get_Category(null, $store, $lang, $count, $page);
+		$categories = $this->category->getCategoryList(0, $count, $page, $code, $store, $lang, $filter);
+		$recordsTotal = $this->db->from($this->tblCategories)->count_all_results();
+		$totalPages = ceil($recordsTotal / $count);
+		
+		$response = array('categories' => $categories, 'number' => count($categories), 'recordsFiltered' => 0, 'recordsTotal' => $recordsTotal, 'totalPages' => $totalPages);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
 
-		$categories = $this->category->getCategoryList(0, $code, $store, $lang, $count, $page, $filter);
-		$response = array(
-			'categories' => $categories, 'number' => count($categories), 'recordsFiltered' => 0, 'recordsTotal' => count($categories), 'totalPages' => ceil(count($categories) / $count)
-		);
+	public function hierarchyList_get()
+	{
+		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
+		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
+		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+
+		$response = $this->category->getCategoryHierarchyList(0, $count, $page, $store, $lang);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
@@ -75,6 +85,19 @@ class Category extends REST_Controller
 	{
 		$response = $this->category->addCategory($this->post());
 		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function createCategoryImage_post($id)
+	{
+		$response = array('status' => false, 'message' => 'image open failed');
+		if (isset($_FILES['file'])) {
+			$file_tmp = $_FILES['file']['tmp_name'];
+			$data = file_get_contents($file_tmp);
+			$file_name = preg_replace('/\s+/', '', basename($_FILES["file"]["name"]));
+			$response =	$this->category->addCategoryImage($file_name, base64_encode($data), $id);
+			$this->response($response, REST_Controller::HTTP_OK);
+		} else
+			$this->response($response, REST_Controller::HTTP_NOT_FOUND);
 	}
 
 	public function visible_post()

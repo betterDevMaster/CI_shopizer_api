@@ -23,7 +23,7 @@ class Store extends REST_Controller
 
 	public function default_get($store = 'DEFAULT', $names = false, $list = false)
 	{
-		$response = $this->store->get_Default($store, $names, $list);
+		$response = $this->store->getDefault($store, $names, $list);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 

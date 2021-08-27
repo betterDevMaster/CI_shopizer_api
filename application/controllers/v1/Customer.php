@@ -158,12 +158,12 @@ class Customer extends REST_Controller
 		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
 		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
 		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
-		$response = $this->customer->getList($store, $lang, $count, $page, $id);
+		$customers = $this->customer->getList($store, $lang, $count, $page, $id);
 		if (!$id)
-			$response = array('number' => count($response[2]), 'customers' => $response[2], 'recordsFiltered' => 0, 'recordsTotal' => $response[0],  'totalPages' => $response[1]);
+			$response = array('customers' => $customers[2], 'number' => count($customers[2]), 'recordsFiltered' => 0, 'recordsTotal' => $customers[0], 'totalPages' => $customers[1]);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
-	
+
 	public function list_post()
 	{
 		$response = $this->customer->addCustomerList($this->post());
@@ -182,10 +182,10 @@ class Customer extends REST_Controller
 		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
 		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
 		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
-		// $response = $this->customer->getOrder($store, $lang, $count, $page, $id);
-		if (!$id)
-			$response = array('number' => 0, 'orders' => null, 'recordsFiltered' => 0, 'recordsTotal' => 0,  'totalPages' => 0);
-			// $response = array('number' => count($response[2]), 'customers' => $response[2], 'recordsFiltered' => 0, 'recordsTotal' => $response[0],  'totalPages' => $response[1]);
+		$response = null;
+		// $orders = $this->customer->getOrder($store, $lang, $count, $page, $id);
+		// if (!$id)
+		// 	$response = array('orders' => $orders[2], 'number' => count($orders[2]), 'recordsFiltered' => 0, 'recordsTotal' => $orders[0], 'totalPages' => $orders[1]);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 

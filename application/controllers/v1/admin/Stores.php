@@ -26,8 +26,13 @@ class Stores extends REST_Controller
 
 	public function list_get()
 	{
-		$stores = $this->store->get_Default('DEFAULT', false, true);
-		$response = array('data' => $stores, 'number' => 10, 'recordsFiltered' => 10, 'recordsTotal' => count($stores), 'totalPages' => 1);
+		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
+		$stores = $this->store->getDefault('DEFAULT', false, true, $count);
+
+		$recordsTotal = $this->db->from($this->tblStore)->count_all_results();
+		$totalPages = ceil($recordsTotal / $count);
+		$response = array('data' => $stores, 'number' => count($stores), 'recordsFiltered' => 0, 'recordsTotal' => $recordsTotal, 'totalPages' => $totalPages);
+
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 

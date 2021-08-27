@@ -52,8 +52,8 @@ class Content extends REST_Controller
 		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
 		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
 		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
-		$content = $this->content->get_Category($page, $count, $store, $lang, null);
-		$response = array('categories' => $content, 'number' => count($content), 'recordsFiltered' => 0, 'recordsTotal' => count($content), 'totalPages' => 1);
+		$content = $this->content->getCategory($page, $count, $store, $lang, null);
+		$response = array('categories' => $content[2], 'number' => count($content[2]), 'recordsFiltered' => 0, 'recordsTotal' => $content[0], 'totalPages' => $content[1]);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 

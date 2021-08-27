@@ -142,6 +142,7 @@ class Customer_model extends CI_Model
 			$result['billing'] = $this->db->select('*')->get_where($this->tblUserBilling, array('id' => $result['billing']))->row_array();
 			$result['delivery'] = $this->db->select('*')->get_where($this->tblUserDelivery, array('id' => $result['delivery']))->row_array();
 		}
+
 		return $result;
 	}
 

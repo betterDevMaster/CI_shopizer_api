@@ -21,6 +21,17 @@ if (!function_exists('GetTableDetails')) {
 	}
 }
 
+if (!function_exists('DeleteDescriptionsInTableWithCondition')) {
+	function DeleteDescriptionsInTableWithCondition($_this, $table, $where)
+	{
+		$descriptionsId = $_this->db->get_where($table, $where)->row_array()['descriptions'];
+		$descriptionList = explode(',', $descriptionsId);
+		foreach ($descriptionList as $v) {
+			$_this->db->delete('tbl_description', array('id' => $v));
+		}
+	}
+}
+
 if (!function_exists('SetTableIDsToString')) {
 	function SetTableIDsToString($ids)
 	{

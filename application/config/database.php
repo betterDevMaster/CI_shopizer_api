@@ -104,10 +104,10 @@ $db['default'] = array(
     'password' => '',
     'database' => 'shopizer',
 
-    // 'hostname' => '192.185.110.227',
-	// 'username' => 'healthym_healthy',
-    // 'password' => 'healthy123',
-    // 'database' => 'healthym_shopizer',
+    // 'hostname' => 'ggaming.ddns.net',
+	// 'username' => 'healthy',
+    // 'password' => 'Pass123!@#',
+    // 'database' => 'healthy',
 
     'dbdriver' => 'mysqli',
     'dbprefix' => '',

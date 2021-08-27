@@ -13,7 +13,7 @@ class Store_model extends CI_Model
 		parent::__construct();
 	}
 
-	function get_Default($store, $names, $list)
+	function getDefault($store, $names, $list, $count = null)
 	{
 		if (!$list) {
 			if (!$names)
