@@ -35,8 +35,8 @@ class Content extends REST_Controller
 	{
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
 		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
-		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
-		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
+		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
+		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
 		if (!$uniqueCode) {
 			$content = $this->content->get_Pages($page, $count, $store, $lang, $box);
 			$response = array('items' => $content[2], 'number' => count($content[2]), 'recordsFiltered' => 0, 'recordsTotal' => $content[0], 'totalPages' => $content[1]);
@@ -50,8 +50,8 @@ class Content extends REST_Controller
 	{
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
 		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
-		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
-		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
+		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
+		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
 		$content = $this->content->getCategory($page, $count, $store, $lang, null);
 		$response = array('categories' => $content[2], 'number' => count($content[2]), 'recordsFiltered' => 0, 'recordsTotal' => $content[0], 'totalPages' => $content[1]);
 		$this->response($response, REST_Controller::HTTP_OK);

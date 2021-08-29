@@ -121,8 +121,8 @@ class Modules extends REST_Controller
 	public function taxClass_get($code = null)
 	{
 		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
-		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
-		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
+		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
+		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
 		$response = $this->module->getTaxModule($lang, $count, $page, $code, $this->tblTax);
 		if (!$code)
 			$response = array('number' => count($response[2]), 'items' => $response[2], 'recordsFiltered' => 0, 'recordsTotal' => $response[0],  'totalPages' => $response[1]);
@@ -158,8 +158,8 @@ class Modules extends REST_Controller
 	public function taxRates_get($id = null)
 	{
 		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
-		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
-		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
+		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
+		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
 		$response = $this->module->getTaxModule($lang, $count, $page, $id, $this->tblTaxRate);
 		if (!$id)
 			$response = array('number' => count($response[2]), 'items' => $response[2], 'recordsFiltered' => 0, 'recordsTotal' => $response[0],  'totalPages' => $response[1]);

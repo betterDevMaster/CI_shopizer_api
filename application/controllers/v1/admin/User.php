@@ -96,7 +96,7 @@ class User extends REST_Controller
 
 	public function users_get()
 	{
-		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
+		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
 		$users  = $this->common->get_TableContentWithArrayResult($this->tblUser);
 		$recordsTotal = $this->db->from($this->tblProducts)->count_all_results();
 		$totalPages = ceil($recordsTotal / $count);

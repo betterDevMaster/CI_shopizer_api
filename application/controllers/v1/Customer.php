@@ -156,8 +156,8 @@ class Customer extends REST_Controller
 	{
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
 		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
-		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
-		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
+		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
+		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
 		$customers = $this->customer->getList($store, $lang, $count, $page, $id);
 		if (!$id)
 			$response = array('customers' => $customers[2], 'number' => count($customers[2]), 'recordsFiltered' => 0, 'recordsTotal' => $customers[0], 'totalPages' => $customers[1]);
@@ -180,8 +180,8 @@ class Customer extends REST_Controller
 	{
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
 		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
-		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
-		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
+		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
+		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
 		$response = null;
 		// $orders = $this->customer->getOrder($store, $lang, $count, $page, $id);
 		// if (!$id)

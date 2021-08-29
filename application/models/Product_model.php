@@ -36,22 +36,21 @@ class Product_model extends CI_Model
 		if (!$category)
 			$products = $this->db->limit($count, $count * $page)->get($this->tblProducts)->result_array();
 		else {
-			if (IsNullOrEmptyString($manufacturer)) {
-				$manufacturers = $this->db->select('id')->get($this->tblManufacturer)->result_array();
-				foreach ($manufacturers as $k0 => $v0) {
-					$manuId = $v0['id'];
-					$this->db->or_where("manufacturer LIKE '%$manuId%'");
-				}
-			} else {
-				$manufacturerList = explode(',', $manufacturer);
-				foreach ($manufacturerList as $k => $v) {
-					if (!$v) continue;
-					$this->db->or_where("manufacturer LIKE '%$v%'");
-				}
-			}
-			$products = $this->db->limit($count, $count * $page)->get_where($this->tblProducts, array('category' => $category))->result_array();
+			// if (IsNullOrEmptyString($manufacturer)) {
+			// 	$manufacturers = $this->db->select('id')->get($this->tblManufacturer)->result_array();
+			// 	foreach ($manufacturers as $k0 => $v0) {
+			// 		$manuId = $v0['id'];
+			// 		$this->db->or_where("manufacturer LIKE '%$manuId%'");
+			// 	}
+			// } else {
+			// 	$manufacturerList = explode(',', $manufacturer);
+			// 	foreach ($manufacturerList as $k => $v) {
+			// 		if (!$v) continue;
+			// 		$this->db->or_where("manufacturer LIKE '%$v%'");
+			// 	}
+			// }
+			$products = $this->db->limit($count, $count * $page)->get_where($this->tblProducts, array('category' => (int)$category))->result_array();
 		}
-
 		foreach ($products as $k1 => $v1) {
 			if (!$v1['attributes']) $products[$k1]['attributes'] = array();
 
@@ -314,12 +313,113 @@ class Product_model extends CI_Model
 		return $products;
 	}
 
-	// function getProductList($count, $store, $lang, $page, $categoryId, $manufacturerId)
-	// {
-	// 	$manufacturer = IsNullOrEmptyString($manufacturerId) ? null : $manufacturerId;
-	// 	$product = $this->getFeaturedItem($count, $store, $lang, $page, $categoryId, $manufacturer);
-	// 	return $product;
-	// }
+	function getProductList($count, $store, $lang, $page, $categoryId, $manufacturerId)
+	{
+		$products = $this->db->limit($count, $count * $page)->get_where($this->tblProducts, array('category' => $categoryId))->result_array();
+
+		$productList = array();
+		if ($manufacturerId) {
+			$manufacturerList = explode(',', $manufacturerId);
+			foreach ($manufacturerList as $k => $v) {
+				if (!$v) continue;
+
+				$new = array_filter($products, function ($var) use ($v) {
+					return ($var['manufacturer'] == $v);
+				});
+				$productList = array_merge($productList, $new);
+			}
+			$products = $productList;
+		}
+
+		foreach ($products as $k1 => $v1) {
+			if (!$v1['attributes']) $products[$k1]['attributes'] = array();
+
+			// Category
+			$category = $this->db->select('*')->get_where($this->tblCategories, array('id' => $v1['category']))->row_array();
+			$category['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $category['descriptions']);
+			$category['description'] = count($category['descriptions']) > 0 && $category['descriptions'][0] ? $category['descriptions'][0] : null;
+			// array_push($products[$k1]['category'], $category);
+			$products[$k1]['category'] = $category;
+
+			// CartItemattributes
+			$products[$k1]['cartItemattributes'] = GetTableDetails($this, $this->tblCartItemAttributes, 'id', $products[$k1]['cartItemattributes']);
+			foreach ($products[$k1]['cartItemattributes'] as $k9 => $v9) {
+				$products[$k1]['cartItemattributes'][$k9]['option'] = $this->calcOption($v9['option']);
+				$products[$k1]['cartItemattributes'][$k9]['optionValue'] = $this->calcOptionValue($v9['optionValue']);
+			}
+
+			// Description
+			$products[$k1]['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $products[$k1]['descriptions']);
+			$products[$k1]['description'] = count($products[$k1]['descriptions']) > 0 && $products[$k1]['descriptions'][0] ? $products[$k1]['descriptions'][0] : null;
+
+			// Image
+			$products[$k1]['image'] = $this->db->select('*')->get_where($this->tblImage, array('id' => $v1['image']))->row_array();
+
+			// Images
+			$imageList = explode(',', $v1['images']);
+			$products[$k1]['images'] = array();
+			foreach ($imageList as $k4 => $v4) {
+				if (!$v4) continue;
+				$image = $this->db->select('*')->get_where($this->tblImage, array('id' => $v4))->row_array();
+				array_push($products[$k1]['images'], $image);
+			}
+
+			// Manufacturer
+			$manufacturer = $this->db->select('*')->get_where($this->tblManufacturer, array('id' => $v1['manufacturer']))->row_array();
+			$manufacturer['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $manufacturer['descriptions']);
+			$manufacturer['description'] = count($manufacturer['descriptions']) > 0 && $manufacturer['descriptions'][0] ? $manufacturer['descriptions'][0] : null;
+			$products[$k1]['manufacturer'] = $manufacturer;
+
+			// Options
+			$optionList = explode(',', $v1['options']);
+			$products[$k1]['options'] = array();
+			foreach ($optionList as $k5 => $v5) {
+				if (!$v5) continue;
+				$products[$k1]['options'] = $this->calcOption($v5);
+			}
+
+			// Product Price
+			$productPrice = $this->db->select('*')->get_where($this->tblProductPrice, array('id' => $v1['productPrice']))->row_array();
+			$productPrice['description'] = $this->db->select('*')->get_where($this->tblDescription, array('id' => $productPrice['description']))->row_array();
+			$products[$k1]['productPrice'] = $productPrice;
+
+			// Product Specification
+			$productSpecification = $this->db->select('*')->get_where($this->tblProductSpecification, array('id' => $v1['productSpecifications']))->row_array();
+			$products[$k1]['productSpecifications'] = $productSpecification;
+
+			// Properties
+			$propertyList = explode(',', $v1['properties']);
+			$products[$k1]['properties'] = array();
+			foreach ($propertyList as $k8 => $v8) {
+				if (!$v8) continue;
+				$properties = $this->db->select('*')->get_where($this->tblProperties, array('id' => $v8))->row_array();
+				$property = $this->db->select('*')->get_where($this->tblProperty, array('id' => $properties['property']))->row_array();
+				if (!$property['optionValues']) $property['optionValues'] = array();
+				$propertyValue = $this->db->select('*')->get_where($this->tblPropertyValue, array('id' => $properties['propertyValue']))->row_array();
+				if (!$propertyValue['values']) $propertyValue['values'] = array();
+				$properties['property'] = $property;
+				$properties['propertyValue'] = $propertyValue;
+				array_push($products[$k1]['properties'], $properties);
+			}
+
+			// Type
+			$propertyType = $this->db->select('*')->get_where($this->tblPropertyType, array('id' => $v1['type']))->row_array();
+			$propertyType['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $propertyType['descriptions']);
+			$propertyType['description'] = count($propertyType['descriptions']) > 0 && $propertyType['descriptions'][0] ? $propertyType['descriptions'][0] : null;
+			$products[$k1]['type'] = $propertyType;
+
+			// Unit
+			$propertyUnit = $this->db->select('*')->get_where($this->tblProductUnit, array('id' => $v1['unit']))->row_array();
+			$propertyUnit['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $propertyUnit['descriptions']);
+			$propertyUnit['description'] = count($propertyUnit['descriptions']) > 0 && $propertyUnit['descriptions'][0] ? $propertyUnit['descriptions'][0] : null;
+			$products[$k1]['unit'] = $propertyUnit;
+		}
+
+		$recordsTotal = count($products);
+		$totalPages = ceil($recordsTotal / $count);
+		$products = array($recordsTotal, $totalPages, $products);
+		return $products;
+	}
 
 	function getProductDetail($count, $store, $lang, $page, $productId)
 	{

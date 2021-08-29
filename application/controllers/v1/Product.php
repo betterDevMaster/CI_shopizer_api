@@ -39,10 +39,10 @@ class Product extends REST_Controller
 	// Product / Products	
 	public function featuredItem_get()
 	{
-		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
+		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
 		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
-		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
+		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
 		$products = $this->product->getFeaturedItem($count, $store, $lang, $page);
 		$response = array('products' => $products[2], 'number' => count($products[2]), 'recordsFiltered' => 0, 'recordsTotal' => $products[0], 'totalPages' => $products[1]);
 		$this->response($response, REST_Controller::HTTP_OK);
@@ -54,24 +54,25 @@ class Product extends REST_Controller
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
-	// public function productList_get()
-	// {
-	// 	$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
-	// 	$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
-	// 	$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
-	// 	$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
-	// 	$categoryId = isset($_REQUEST['category']) ? $_REQUEST['category'] : 0;
-	// 	$manufacturerId = isset($_REQUEST['manufacturer']) ? $_REQUEST['manufacturer'] : null;
-	// 	$products = $this->product->getProductList($count, $store, $lang, $page, $categoryId, $manufacturerId);
-	// 	$response = array('products' => $products[2], 'number' => count($products[2]), 'recordsFiltered' => 0, 'recordsTotal' => $products[0], 'totalPages' => $products[1]);
-	// 	$this->response($response, REST_Controller::HTTP_OK);
-	// }
+	public function productList_get()
+	{
+		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
+		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
+		$category = isset($_REQUEST['category']) ? (int)$_REQUEST['category'] : 0;
+		$manufacturer = isset($_REQUEST['manufacturer']) ? $_REQUEST['manufacturer'] : null;
+
+		$products = $this->product->getProductList($count, $store, $lang, $page, $category, $manufacturer);
+		$response = array('products' => $products[2], 'number' => count($products[2]), 'recordsFiltered' => 0, 'recordsTotal' => $products[0], 'totalPages' => $products[1]);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
 
 	public function productDetail_get($productId)
 	{
-		$count = isset($pData['count']) ? $pData['count'] : 10;
+		$count = isset($pData['count']) ? (int)$pData['count'] : 10;
 		$store = isset($pData['store']) ? $pData['store'] : 'DEFAULT';
-		$page = isset($pData['page']) ? $pData['page'] : 0;
+		$page = isset($pData['page']) ? (int)$pData['page'] : 0;
 		$lang = isset($pData['lang']) ? $pData['lang'] : 'en';
 		$response = $this->product->getProductDetail($count, $store, $lang, $page, $productId);
 		$this->response($response, REST_Controller::HTTP_OK);
@@ -137,10 +138,10 @@ class Product extends REST_Controller
 	// Product / Options	
 	public function options_get()
 	{
-		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
+		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
 		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
-		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
+		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
 		$options  = $this->product->get_Options($count, $store, $lang, $page);
 		$response = array('options' => $options[2], 'number' => count($options[2]), 'recordsFiltered' => 0, 'recordsTotal' => $options[0], 'totalPages' => $options[1]);
 		$this->response($response, REST_Controller::HTTP_OK);
@@ -148,9 +149,9 @@ class Product extends REST_Controller
 
 	public function getOption_get()
 	{
-		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
+		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
 		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
-		$id = isset($_REQUEST['id']) ? $_REQUEST['id'] : 0;
+		$id = isset($_REQUEST['id']) ? (int)$_REQUEST['id'] : 0;
 		$response  = $this->product->get_OptionsById($count, $lang, $id);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
@@ -182,10 +183,10 @@ class Product extends REST_Controller
 
 	public function attributes_get()
 	{
-		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
+		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
 		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
-		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
+		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
 		$productId = isset($_REQUEST['productId']) ? $_REQUEST['productId'] : 0;
 		$attributes  = $this->product->getAttributes($productId, $count, $store, $lang, $page);
 		$response = array('attributes' => $attributes[2], 'number' => count($attributes[2]), 'recordsFiltered' => 0, 'recordsTotal' => $attributes[0], 'totalPages' => $attributes[1]);
@@ -219,10 +220,10 @@ class Product extends REST_Controller
 	// Product / optionValues	
 	public function optionValues_get()
 	{
-		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
+		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
 		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
-		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
+		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
 		$optionValues  = $this->product->getOptionValues($count, $store, $lang, $page);
 		$response = array('optionValues' => $optionValues[2], 'number' => count($optionValues[2]), 'recordsFiltered' => 0, 'recordsTotal' => $optionValues[0], 'totalPages' => $optionValues[1]);
 		$this->response($response, REST_Controller::HTTP_OK);
@@ -255,9 +256,9 @@ class Product extends REST_Controller
 
 	public function getOptionValue_get()
 	{
-		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
+		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
 		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
-		$id = isset($_REQUEST['id']) ? $_REQUEST['id'] : 0;
+		$id = isset($_REQUEST['id']) ? (int)$_REQUEST['id'] : 0;
 		$response  = $this->product->get_OptionValueById($count, $lang, $id);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
@@ -329,7 +330,7 @@ class Product extends REST_Controller
 	// Product / Property Type
 	public function types_get()
 	{
-		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
+		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
 		$types  = $this->common->get_TableContentWithArrayResult($this->tblPropertyType);
 		$recordsTotal = $this->db->from($this->tblPropertyType)->count_all_results();
 		$totalPages = ceil($recordsTotal / $count);
@@ -381,7 +382,7 @@ class Product extends REST_Controller
 	// Product / Property Type
 	public function units_get()
 	{
-		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
+		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
 		$units  = $this->common->get_TableContentWithArrayResult($this->tblProductUnit);
 		$recordsTotal = $this->db->from($this->tblProductUnit)->count_all_results();
 		$totalPages = ceil($recordsTotal / $count);
@@ -435,8 +436,8 @@ class Product extends REST_Controller
 	{
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
 		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
-		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
-		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
+		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
+		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
 
 		$items  = $this->product->getVariation($store, $lang, $count, $page);
 		$response = array('items' => $items[2], 'number' => count($items[2]), 'recordsFiltered' => 0, 'recordsTotal' => $items[0], 'totalPages' => $items[1]);
@@ -461,8 +462,8 @@ class Product extends REST_Controller
 	{
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
 		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
-		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
-		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
+		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
+		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
 
 		$manufacturers  = $this->product->getManufacturers($store, $lang, $page, $count);
 		$response = array('manufacturers' => $manufacturers[2], 'number' => count($manufacturers[2]), 'recordsFiltered' => 0, 'recordsTotal' => $manufacturers[0], 'totalPages' => $manufacturers[1]);
@@ -511,7 +512,7 @@ class Product extends REST_Controller
 
 	public function getProductsByGroup_get($groupCode)
 	{
-		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
+		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
 		$products = $this->product->getProductsByGroup($groupCode, $count);
 		$response = array('products' => $products[2], 'number' => count($products[2]), 'recordsFiltered' => 0, 'recordsTotal' => $products[0], 'totalPages' => $products[1]);
 		$this->response($response, REST_Controller::HTTP_OK);

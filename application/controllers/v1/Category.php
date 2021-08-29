@@ -26,8 +26,8 @@ class Category extends REST_Controller
 
 	public function list_get()
 	{
-		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 20;
-		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
+		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 20;
+		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
 		$filter = isset($_REQUEST['filter']) ? $_REQUEST['filter'] : 'admin';
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
 		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
@@ -43,8 +43,8 @@ class Category extends REST_Controller
 
 	public function hierarchyList_get()
 	{
-		$count = isset($_REQUEST['count']) ? $_REQUEST['count'] : 10;
-		$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
+		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
+		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
 		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
 
