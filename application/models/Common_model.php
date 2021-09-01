@@ -13,6 +13,12 @@ class Common_model extends CI_Model
 		return $result;
 	}
 
+	function get_TableContentWithArrayResultWithCount($table, $count, $page)
+	{
+		$result =  $this->db->limit($count, $page)->get($table)->result_array();
+		return $result;
+	}
+
 	function get_TableContentWithArrayResultAndCondition($where, $table)
 	{
 		$result =  $this->db->select('*')->get_where($table, $where)->result_array();

@@ -43,8 +43,16 @@ class Product extends REST_Controller
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
 		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
 		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
-		$products = $this->product->getFeaturedItem($count, $store, $lang, $page);
+		$products = $this->product->getProductList($count, $store, $lang, $page);
 		$response = array('products' => $products[2], 'number' => count($products[2]), 'recordsFiltered' => 0, 'recordsTotal' => $products[0], 'totalPages' => $products[1]);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function bestselllersItem_get()
+	{
+		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$response = $this->product->getBestSellersItem($store, $lang);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
@@ -331,7 +339,8 @@ class Product extends REST_Controller
 	public function types_get()
 	{
 		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
-		$types  = $this->common->get_TableContentWithArrayResult($this->tblPropertyType);
+		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
+		$types  = $this->common->get_TableContentWithArrayResultWithCount($this->tblPropertyType, $count, $page);
 		$recordsTotal = $this->db->from($this->tblPropertyType)->count_all_results();
 		$totalPages = ceil($recordsTotal / $count);
 		$response = array('list' => $types, 'number' => count($types), 'recordsFiltered' => 0, 'recordsTotal' => $recordsTotal, 'totalPages' => $totalPages);
@@ -382,8 +391,12 @@ class Product extends REST_Controller
 	// Product / Property Type
 	public function units_get()
 	{
+		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
 		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
-		$units  = $this->common->get_TableContentWithArrayResult($this->tblProductUnit);
+		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
+
+		$units  = $this->common->get_TableContentWithArrayResultWithCount($this->tblProductUnit, $count, $page);
 		$recordsTotal = $this->db->from($this->tblProductUnit)->count_all_results();
 		$totalPages = ceil($recordsTotal / $count);
 		$response = array('list' => $units, 'number' => count($units), 'recordsFiltered' => 0, 'recordsTotal' => $recordsTotal, 'totalPages' => $totalPages);
