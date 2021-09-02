@@ -312,11 +312,13 @@ class Product_model extends CI_Model
 		return $products;
 	}
 
-	function getProductList($count, $store, $lang, $page, $categoryId = null, $manufacturerId = null)
+	function getProductList($count, $store, $lang, $page, $categoryId = null, $manufacturerId = null, $promo = false)
 	{
-		if ($categoryId)
-			$products = $this->db->limit($count, $count * $page)->get_where($this->tblProducts, array('category' => $categoryId))->result_array();
-		else
+		if ($categoryId) {
+			$where = array('category' => $categoryId);
+			if ($promo) $where = array('category' => $categoryId, 'discounted' => true);
+			$products = $this->db->limit($count, $count * $page)->get_where($this->tblProducts, $where)->result_array();
+		} else
 			$products = $this->db->limit($count, $count * $page)->get($this->tblProducts)->result_array();
 
 		$productList = array();

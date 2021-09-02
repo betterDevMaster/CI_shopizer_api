@@ -70,8 +70,9 @@ class Product extends REST_Controller
 		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
 		$category = isset($_REQUEST['category']) ? (int)$_REQUEST['category'] : 0;
 		$manufacturer = isset($_REQUEST['manufacturer']) ? $_REQUEST['manufacturer'] : null;
+		$promo = isset($_REQUEST['promo']) ? true : false;
 
-		$products = $this->product->getProductList($count, $store, $lang, $page, $category, $manufacturer);
+		$products = $this->product->getProductList($count, $store, $lang, $page, $category, $manufacturer, $promo);
 		$response = array('products' => $products[2], 'number' => count($products[2]), 'recordsFiltered' => 0, 'recordsTotal' => $products[0], 'totalPages' => $products[1]);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}

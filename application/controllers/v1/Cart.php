@@ -29,7 +29,10 @@ class Cart extends REST_Controller
 
 	public function getUserCart_get()
 	{
-		$response = $this->cart->get_UserCart($_REQUEST['code'], $_REQUEST['lang'], $_REQUEST['store']);
+		$code = isset($_REQUEST['code']) ? $_REQUEST['code'] : null;
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
+		$response = $this->cart->get_UserCart($code, $lang, $store);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
@@ -47,7 +50,10 @@ class Cart extends REST_Controller
 
 	public function deleteCart_delete()
 	{
-		$response = $this->cart->get_DeleteCart($_REQUEST['code'], $_REQUEST['productId'], $_REQUEST['store']);
+		$code = isset($_REQUEST['code']) ? $_REQUEST['code'] : null;
+		$productId = isset($_REQUEST['productId']) ? $_REQUEST['productId'] : 0;
+		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
+		$response = $this->cart->get_DeleteCart($code, $productId, $store);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 

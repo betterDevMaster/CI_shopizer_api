@@ -144,26 +144,31 @@ class Cart_model extends CI_Model
 			$dupliCatedProductId = false;
 
 			$products = explode(',', $data['products']);
-			$quantitys = explode(',', $data['quantity']);
+			$quantities = explode(',', $data['quantity']);
 
 			if (!$cart) {
 				foreach ($products as $k1 => $v1) {
 					if (!$v1) continue;
 					if ($v1 == $pData['productId']) {
-						$quantitys[$k1] = $pData['quantity'];
+						$quantities[$k1] = $pData['quantity'];
 						$dupliCatedProductId = true;
 					}
 				}
-
 				if (!$dupliCatedProductId) {
 					$data['products'] = $data['products'] . $pData['productId'] . ',';
 					$data['quantity'] = $data['quantity'] . $pData['quantity'] . ',';
 				} else {
-					$data['products'] = $data['products'];
+					// update quantity & product when productID duplicates on the products
+					$data['products'] = '';
 					$data['quantity'] = '';
-					foreach ($quantitys as $k2 => $v2) {
+					foreach ($quantities as $k2 => $v2) {
+						if ($v2 == 0) unset($products[$k2]);
 						if (!$v2) continue;
 						$data['quantity'] = $data['quantity'] . $v2 . ',';
+					}
+					foreach ($products as $k4 => $v4) {
+						if (!$v4) continue;
+						$data['products'] = $data['products'] . $v4 . ',';
 					}
 				}
 				$this->db->where($where);
@@ -176,26 +181,28 @@ class Cart_model extends CI_Model
 			$inserId = $this->db->insert_id();
 			$data = $this->db->get_where($this->tblCart, array('id' => $inserId))->row_array();
 			$products = explode(',', $data['products']);
-			$quantitys = explode(',', $data['quantity']);
+			$quantities = explode(',', $data['quantity']);
 		}
 
 		$totals = $this->db->select('*')->get($this->tblTotal)->result_array();
 
+		// Get the whole products detail
 		$data['products'] = array();
 		$totalPrice  = 0;
 		foreach ($products as $k3 => $v3) {
 			if (!$v3) continue;
 			$product = $this->get_FullProduct($v3);
-			$curTotalPrice = $product['price'] * (int)$quantitys[$k3];
+			$curTotalPrice = $product['price'] * (int)$quantities[$k3];
 			$totalPrice  = $curTotalPrice + $totalPrice;
-			$product['quantity'] = (int)$quantitys[$k3];
+			$product['quantity'] = (int)$quantities[$k3];
 			$product['subTotal'] = $product['total'] = $curTotalPrice;
 			$product['displaySubTotal'] = $product['displayTotal'] = "USD" . number_format($curTotalPrice, 2);
 			array_push($data['products'], $product);
 		}
 
+		// Calc whole quantity
 		$quantity = 0;
-		foreach ($quantitys as $k4 => $v4) {
+		foreach ($quantities as $k4 => $v4) {
 			if (!$v4) continue;
 			$quantity = $quantity + (int)$v4;
 		}
@@ -233,17 +240,17 @@ class Cart_model extends CI_Model
 		if (!$data) return;
 
 		$products = explode(',', $data['products']);
-		$quantitys = explode(',', $data['quantity']);
+		$quantities = explode(',', $data['quantity']);
 
 		foreach ($products as $k1 => $v1) {
 			if (!$v1) continue;
 			if ($v1 == $pData['productId']) {
-				$quantitys[$k1] = $pData['quantity'];
+				$quantities[$k1] = $pData['quantity'];
 			}
 		}
 
 		$quantity = '';
-		foreach ($quantitys as $k2 => $v2) {
+		foreach ($quantities as $k2 => $v2) {
 			if (!$v2) continue;
 			$quantity = $quantity . $v2 . ',';
 		}
@@ -265,19 +272,19 @@ class Cart_model extends CI_Model
 		if (!$data) return false;
 
 		$products = explode(',', $data['products']);
-		$quantitys = explode(',', $data['quantity']);
+		$quantities = explode(',', $data['quantity']);
 
 		foreach ($products as $k1 => $v1) {
 			if (!$v1) continue;
 			if ($v1 == $productId) {
 				unset($products[$k1]);
-				unset($quantitys[$k1]);
+				unset($quantities[$k1]);
 			}
 		}
 
 		$product = '';
 		$quantity = '';
-		foreach ($quantitys as $k2 => $v2) {
+		foreach ($quantities as $k2 => $v2) {
 			if (!$v2) continue;
 			$quantity = $quantity . $v2 . ',';
 		}
