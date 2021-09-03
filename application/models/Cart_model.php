@@ -124,10 +124,12 @@ class Cart_model extends CI_Model
 	function get_AddCart($pData = null, $cart = null, $promoCart = null)
 	{
 		if (!$cart) {
-			$where = array('customer' => $pData['customerId']);
+			if (isset($pData['customerId'])) $customerId = $pData['customerId'];
+			else $customerId = 0;
+			$where = array('customer' => $customerId);
 			$data = $this->db->get_where($this->tblCart, $where)->row_array();
-			$data['code'] = md5($pData['customerId']);
-			$data['customer'] = $pData['customerId'];
+			$data['code'] = md5($customerId);
+			$data['customer'] = $customerId;
 		} else {
 			if (!IsNullOrEmptyString($promoCart)) {
 				$this->db->set('promoCode', $promoCart); //value that used to update column

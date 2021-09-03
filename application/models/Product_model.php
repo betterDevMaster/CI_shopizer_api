@@ -177,9 +177,8 @@ class Product_model extends CI_Model
 			'capacity' => $pData['capacity'],
 			'dateAvailable' => $pData['dateAvailable'],
 			'descriptions' => $descriptions,
-			'displaySubTotal' => $pData['displaySubTotal'],
+			'discounted' => $pData['discounted'],
 			'identifier' => $pData['identifier'],
-			'finalPrice' => $pData['price'],
 			'manufacturer' => (int)$manufacturerId,
 			'originalPrice' => $pData['price'],
 			'price' => $pData['price'],
@@ -189,6 +188,12 @@ class Product_model extends CI_Model
 			'unit' => (int)$unitId,
 			'visible' => $pData['visible'],
 		);
+
+		if ($pData['discounted'])
+			$data['finalPrice'] = $pData['finalPrice'];
+		else
+			$data['finalPrice'] = $pData['price'];
+
 		$this->db->insert($this->tblProducts, $data);
 		return $pData;
 	}
@@ -232,8 +237,7 @@ class Product_model extends CI_Model
 			'capacity' => $pData['capacity'],
 			'dateAvailable' => $pData['dateAvailable'],
 			'descriptions' => $descriptions,
-			'displaySubTotal' => $pData['displaySubTotal'],
-			'finalPrice' => $pData['price'],
+			'discounted' => $pData['discounted'],
 			'identifier' => $pData['identifier'],
 			'manufacturer' => (int)$manufacturerId,
 			'originalPrice' => $pData['price'],
@@ -244,6 +248,12 @@ class Product_model extends CI_Model
 			'unit' => (int)$unitId,
 			'visible' => $pData['visible'],
 		);
+
+		if ($pData['discounted'])
+			$data['finalPrice'] = $pData['finalPrice'];
+		else
+			$data['finalPrice'] = $pData['price'];
+
 		$this->db->where(array('identifier' => $pData['identifier']))->update($this->tblProducts, $data);
 		return true;
 	}
@@ -355,6 +365,20 @@ class Product_model extends CI_Model
 		$product = $this->db->get_where($this->tblProducts, array('id' => $productId))->row_array();
 		$product = $this->getDetailedProduct($product);
 		return $product;
+	}
+
+	function searchProductList($count, $store, $lang, $page, $key)
+	{
+		$this->db->where("identifier LIKE '%$key%'");
+		$products = $this->db->limit($count, $count * $page)->get($this->tblProducts)->result_array();
+		foreach ($products as $k1 => $v1) {
+			$products[$k1] = $this->getDetailedProduct($products[$k1]);
+		}
+		
+		$productCount = $this->db->from($this->tblProducts)->where("identifier LIKE '%$key%'")->count_all_results();
+		$totalPages = ceil($productCount / $count);
+		$products = array($productCount, $totalPages, $products);
+		return $products;
 	}
 
 	function get_ProductReview($pData)

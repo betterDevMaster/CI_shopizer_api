@@ -79,11 +79,23 @@ class Product extends REST_Controller
 
 	public function productDetail_get($productId)
 	{
-		$count = isset($pData['count']) ? (int)$pData['count'] : 10;
-		$store = isset($pData['store']) ? $pData['store'] : 'DEFAULT';
-		$page = isset($pData['page']) ? (int)$pData['page'] : 0;
-		$lang = isset($pData['lang']) ? $pData['lang'] : 'en';
+		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
+		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
+		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
 		$response = $this->product->getProductDetail($count, $store, $lang, $page, $productId);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function productSearch_get()
+	{
+		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
+		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
+		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$key = isset($_REQUEST['key']) ? $_REQUEST['key'] : null;
+		$products = $this->product->searchProductList($count, $store, $lang, $page, $key);
+		$response = array('products' => $products[2], 'number' => count($products[2]), 'recordsFiltered' => 0, 'productCount' => $products[0], 'totalPages' => $products[1]);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
