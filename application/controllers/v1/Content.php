@@ -41,7 +41,7 @@ class Content extends REST_Controller
 			$content = $this->content->get_Pages($page, $count, $store, $lang, $box);
 			$response = array('items' => $content[2], 'number' => count($content[2]), 'recordsFiltered' => 0, 'recordsTotal' => $content[0], 'totalPages' => $content[1]);
 		} else {
-			$response = $this->content->get_PageDetail(array('contentID' => $uniqueCode), $box);
+			$response = $this->content->get_PageDetail(array('contentID' => $uniqueCode), $box, $lang);
 		}
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
@@ -59,7 +59,8 @@ class Content extends REST_Controller
 
 	public function pageDetail_post()
 	{
-		$response = $this->content->get_PageDetail($this->post());
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$response = $this->content->get_PageDetail($this->post(), $lang);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 

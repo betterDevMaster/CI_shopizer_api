@@ -21,7 +21,8 @@ class Category_model extends CI_Model
 		// $category = $this->db->limit($count, $count * $page)->get_where($this->tblCategories, array('parent' => $id))->result_array();
 		for ($i = 0; $i < count($category); $i++) {
 			$category[$i]['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $category[$i]['descriptions']);
-			$category[$i]['description'] = count($category[$i]['descriptions']) > 0 && $category[$i]['descriptions'][0] ? $category[$i]['descriptions'][0] : null;
+			$category[$i]['description'] = customFilterArray($category[$i]['descriptions'], $term = 'language', $lang)[0];
+			// $category[$i]['description'] = count($category[$i]['descriptions']) > 0 && $category[$i]['descriptions'][0] ? $category[$i]['descriptions'][0] : null;
 			$category[$i]['parent'] = $this->db->select('id, code')->get_where($this->tblCategories, array('id' => $category[$i]['parent']))->row_array();
 			// $category[$i]['children'] = $this->getCategoryList($category[$i]['id'], $count, $page);
 		}
@@ -33,9 +34,10 @@ class Category_model extends CI_Model
 		$category = $this->db->get_where($this->tblCategories, array('parent' => $id))->result_array();
 		for ($i = 0; $i < count($category); $i++) {
 			$category[$i]['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $category[$i]['descriptions']);
-			$category[$i]['description'] = count($category[$i]['descriptions']) > 0 && $category[$i]['descriptions'][0] ? $category[$i]['descriptions'][0] : null;
+			$category[$i]['description'] = customFilterArray($category[$i]['descriptions'], $term = 'language', $lang)[0];
+			// $category[$i]['description'] = count($new_array) > 0 ? $new_array[0] : null;
 			$category[$i]['parent'] = $this->db->select('id, code')->get_where($this->tblCategories, array('id' => $category[$i]['parent']))->row_array();
-			$category[$i]['children'] = $this->getCategoryHierarchyList($category[$i]['id']);
+			$category[$i]['children'] = $this->getCategoryHierarchyList($category[$i]['id'], $count, $page, $store, $lang);
 		}
 		return $category;
 	}
@@ -48,7 +50,8 @@ class Category_model extends CI_Model
 			$category = $this->db->select('*')->get_where($this->tblCategories, array('id' => $id))->result_array();
 		}
 		$category['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $category['descriptions']);
-		$category['description'] = count($category['descriptions']) > 0 && $category['descriptions'][0] ? $category['descriptions'][0] : null;
+		$category['description'] = customFilterArray($category['descriptions'], $term = 'language', $lang)[0];
+		// $category['description'] = count($category['descriptions']) > 0 && $category['descriptions'][0] ? $category['descriptions'][0] : null;
 		$category['parent'] = $this->db->select('id, code')->get_where($this->tblCategories, array('id' => $category['parent']))->row_array();
 		return $category;
 	}
@@ -58,16 +61,18 @@ class Category_model extends CI_Model
 		$manufacturers = $this->db->get($this->tblManufacturer)->result_array();
 		for ($i = 0; $i < count($manufacturers); $i++) {
 			$manufacturers[$i]['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $manufacturers[$i]['descriptions']);
-			$manufacturers[$i]['description'] = count($manufacturers[$i]['descriptions']) > 0 && $manufacturers[$i]['descriptions'][0] ? $manufacturers[$i]['descriptions'][0] : null;
+			$manufacturers[$i]['description'] = customFilterArray($manufacturers[$i]['descriptions'], $term = 'language', $lang)[0];
+			// $manufacturers[$i]['description'] = count($manufacturers[$i]['descriptions']) > 0 && $manufacturers[$i]['descriptions'][0] ? $manufacturers[$i]['descriptions'][0] : null;
 		}
 		return $manufacturers;
 	}
 
-	function getVariants($pData)
+	function getVariants($pData, $lang)
 	{
 		$id = $pData['id'];
 		$options = $this->db->get_where($this->tblOptions, array('id' => $id))->row_array();
 		$options['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $options['descriptions']);
+		// $options['description'] = customFilterArray($options['descriptions'], $term = 'language', $lang)[0];
 		$options['description'] = count($options['descriptions']) > 0 && $options['descriptions'][0] ? $options['descriptions'][0] : null;
 		return $options;
 	}
@@ -75,7 +80,7 @@ class Category_model extends CI_Model
 	function updateCategory($pData)
 	{
 		DeleteDescriptionsInTableWithCondition($this, $this->tblCategories, array('id' => $pData['id']));
-		
+
 		$descriptions = '';
 		foreach ($pData['descriptions'] as $k => $v) {
 			unset($v['id']);

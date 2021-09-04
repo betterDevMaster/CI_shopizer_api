@@ -50,3 +50,15 @@ if (!function_exists('insertCurrencyFromJson_get')) {
 		}
 	}
 }
+
+if (!function_exists('customFilterArray')) {
+	function customFilterArray($array, $term, $cond)
+	{
+		$matches = array();
+		foreach ($array as $a) {
+			if ($a[$term] == $cond)
+				$matches[] = $a;
+		}
+		return $matches;
+	}
+}

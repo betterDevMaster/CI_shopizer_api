@@ -71,7 +71,8 @@ class Category extends REST_Controller
 
 	public function variants_post()
 	{
-		$response = $this->category->getVariants($this->post());
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$response = $this->category->getVariants($this->post(), $lang);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 

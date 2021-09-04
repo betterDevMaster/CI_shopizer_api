@@ -34,7 +34,7 @@ class Cart_model extends CI_Model
 		*** main Param: productId
 		**** get one product and get child categories by this product
 	*/
-	function get_FullProduct($productId = null)
+	function get_FullProduct($productId = null, $lang = null)
 	{
 		$product = $this->db->select('*')->get_where($this->tblProducts, array('id' => $productId))->row_array();
 		if ($product) {
@@ -42,11 +42,13 @@ class Cart_model extends CI_Model
 			// Categories
 			$category = $this->db->select('*')->get_where($this->tblCategories, array('id' => $product['category']))->row_array();
 			$category['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $category['descriptions']);
+			// $category['description'] = customFilterArray($category['descriptions'], $term = 'language', $lang)[0];
 			$category['description'] = count($category['descriptions']) > 0 && $category['descriptions'][0] ? $category['descriptions'][0] : null;
 			$product['category'] = $category;
 
 			// Description
 			$product['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $product['descriptions']);
+			// $product['description'] = customFilterArray($product['descriptions'], $term = 'language', $lang)[0];
 			$product['description'] = count($product['descriptions']) > 0 && $product['descriptions'][0] ? $product['descriptions'][0] : null;
 
 			// Image
@@ -63,6 +65,7 @@ class Cart_model extends CI_Model
 			// Manufacturer
 			$manufacturer = $this->db->select('*')->get_where($this->tblManufacturer, array('id' => $product['manufacturer']))->row_array();
 			$manufacturer['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $manufacturer['descriptions']);
+			// $manufacturer['description'] = customFilterArray($manufacturer['descriptions'], $term = 'language', $lang)[0];
 			$manufacturer['description'] = count($manufacturer['descriptions']) > 0 && $manufacturer['descriptions'][0] ? $manufacturer['descriptions'][0] : null;
 			$product['manufacturer'] = $manufacturer;
 
@@ -78,6 +81,7 @@ class Cart_model extends CI_Model
 					if (!$v7) continue;
 					$optionValues = $this->db->select('*')->get_where($this->tblOptionValues, array('id' => $v7))->row_array();
 					$optionValues['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $optionValues['descriptions']);
+					// $optionValues['description'] = customFilterArray($optionValues['descriptions'], $term = 'language', $lang)[0];
 					$optionValues['description'] = count($optionValues['descriptions']) > 0 && $optionValues['descriptions'][0] ? $optionValues['descriptions'][0] : null;
 					array_push($options['optionValues'], $optionValues);
 				}
@@ -109,6 +113,7 @@ class Cart_model extends CI_Model
 			// Type
 			$type = $this->db->select('*')->get_where($this->tblPropertyType, array('id' => $product['type']))->row_array();
 			$type['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $type['descriptions']);
+			// $type['description'] = customFilterArray($type['descriptions'], $term = 'language', $lang)[0];
 			$type['description'] = count($type['descriptions']) > 0 && $type['descriptions'][0] ? $type['descriptions'][0] : null;
 			$product['type'] = $type;
 
@@ -121,7 +126,7 @@ class Cart_model extends CI_Model
 		*** main Param: customer, code, products, quantity
 		**** param desc: products & quantity format: 1,2,3,4
 	*/
-	function get_AddCart($pData = null, $cart = null, $promoCart = null)
+	function get_AddCart($pData = null, $cart = null, $promoCart = null, $lang = null)
 	{
 		if (!$cart) {
 			if (isset($pData['customerId'])) $customerId = $pData['customerId'];
@@ -193,7 +198,7 @@ class Cart_model extends CI_Model
 		$totalPrice  = 0;
 		foreach ($products as $k3 => $v3) {
 			if (!$v3) continue;
-			$product = $this->get_FullProduct($v3);
+			$product = $this->get_FullProduct($v3, $lang);
 			$curTotalPrice = $product['price'] * (int)$quantities[$k3];
 			$totalPrice  = $curTotalPrice + $totalPrice;
 			$product['quantity'] = (int)$quantities[$k3];
@@ -224,17 +229,17 @@ class Cart_model extends CI_Model
 
 	function get_UserCart($cart, $lang, $store)
 	{
-		$cart = $this->get_AddCart(null, $cart);
+		$cart = $this->get_AddCart(null, $cart, null, $lang);
 		return $cart;
 	}
 
-	function get_UserPromoCart($pData)
+	function get_UserPromoCart($pData, $lang)
 	{
-		$cart = $this->get_AddCart(null, $pData['code'], $pData['promoCart']);
+		$cart = $this->get_AddCart(null, $pData['code'], $pData['promoCart'], $lang);
 		return $cart;
 	}
 
-	function get_UpdateCart($pData)
+	function get_UpdateCart($pData, $lang)
 	{
 		$where = array('code' => $pData['code']);
 		$data = $this->db->get_where($this->tblCart, $where)->row_array();
@@ -262,7 +267,7 @@ class Cart_model extends CI_Model
 		$this->db->where($where);
 		$this->db->update($this->tblCart, $data);
 
-		$cart = $this->get_AddCart(null, $pData['code']);
+		$cart = $this->get_AddCart(null, $pData['code'], null, $lang);
 		return $cart;
 	}
 

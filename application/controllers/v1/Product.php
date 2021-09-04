@@ -50,15 +50,18 @@ class Product extends REST_Controller
 
 	public function bestselllersItem_get()
 	{
+		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
+		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
 		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
-		$response = $this->product->getBestSellersItem($store, $lang);
+		$response = $this->product->getBestSellersItem($count, $store, $lang, $page);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
 	public function price_post()
 	{
-		$response = $this->product->get_Price($this->post());
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$response = $this->product->get_Price($this->post(), $lang);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
