@@ -52,11 +52,11 @@ if (!function_exists('insertCurrencyFromJson_get')) {
 }
 
 if (!function_exists('customFilterArray')) {
-	function customFilterArray($array, $term, $cond)
+	function customFilterArray($array, $cond)
 	{
 		$matches = array();
 		foreach ($array as $a) {
-			if ($a[$term] == $cond)
+			if ($a['language'] == $cond)
 				$matches[] = $a;
 		}
 		return $matches;

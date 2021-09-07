@@ -23,7 +23,7 @@ class Cart extends REST_Controller
 
 	public function addCart_post()
 	{
-		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'es';
 		$response = $this->cart->get_AddCart($this->post(), $lang);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
@@ -31,7 +31,7 @@ class Cart extends REST_Controller
 	public function getUserCart_get()
 	{
 		$code = isset($_REQUEST['code']) ? $_REQUEST['code'] : null;
-		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'es';
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
 		$response = $this->cart->get_UserCart($code, $lang, $store);
 		$this->response($response, REST_Controller::HTTP_OK);
@@ -39,14 +39,14 @@ class Cart extends REST_Controller
 
 	public function promo_post()
 	{
-		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'es';
 		$response = $this->cart->get_UserPromoCart($this->post(), $lang);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
 	public function updateCart_post()
 	{
-		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'es';
 		$response = $this->cart->get_updateCart($this->post(), $lang);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}

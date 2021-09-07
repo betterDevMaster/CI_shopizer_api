@@ -42,14 +42,14 @@ class Cart_model extends CI_Model
 			// Categories
 			$category = $this->db->select('*')->get_where($this->tblCategories, array('id' => $product['category']))->row_array();
 			$category['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $category['descriptions']);
-			// $category['description'] = customFilterArray($category['descriptions'], $term = 'language', $lang)[0];
-			$category['description'] = count($category['descriptions']) > 0 && $category['descriptions'][0] ? $category['descriptions'][0] : null;
+			$newArr = customFilterArray($category['descriptions'], $lang);
+			$category['description'] = count($newArr) > 0 && $newArr[0] ? $newArr[0] : null;
 			$product['category'] = $category;
 
 			// Description
 			$product['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $product['descriptions']);
-			// $product['description'] = customFilterArray($product['descriptions'], $term = 'language', $lang)[0];
-			$product['description'] = count($product['descriptions']) > 0 && $product['descriptions'][0] ? $product['descriptions'][0] : null;
+			$newArr = customFilterArray($product['descriptions'], $lang);
+			$product['description'] = count($newArr) > 0 && $newArr[0] ? $newArr[0] : null;
 
 			// Image
 			$product['image'] = $this->db->select('*')->get_where($this->tblImage, array('id' => $product['image']))->row_array();
@@ -65,8 +65,8 @@ class Cart_model extends CI_Model
 			// Manufacturer
 			$manufacturer = $this->db->select('*')->get_where($this->tblManufacturer, array('id' => $product['manufacturer']))->row_array();
 			$manufacturer['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $manufacturer['descriptions']);
-			// $manufacturer['description'] = customFilterArray($manufacturer['descriptions'], $term = 'language', $lang)[0];
-			$manufacturer['description'] = count($manufacturer['descriptions']) > 0 && $manufacturer['descriptions'][0] ? $manufacturer['descriptions'][0] : null;
+			$newArr = customFilterArray($manufacturer['descriptions'], $lang);
+			$manufacturer['description'] = count($newArr) > 0 && $newArr[0] ? $newArr[0] : null;
 			$product['manufacturer'] = $manufacturer;
 
 			// Options
@@ -81,8 +81,8 @@ class Cart_model extends CI_Model
 					if (!$v7) continue;
 					$optionValues = $this->db->select('*')->get_where($this->tblOptionValues, array('id' => $v7))->row_array();
 					$optionValues['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $optionValues['descriptions']);
-					// $optionValues['description'] = customFilterArray($optionValues['descriptions'], $term = 'language', $lang)[0];
-					$optionValues['description'] = count($optionValues['descriptions']) > 0 && $optionValues['descriptions'][0] ? $optionValues['descriptions'][0] : null;
+					$newArr = customFilterArray($optionValues['descriptions'], $lang);
+					$optionValues['description'] = count($newArr) > 0 && $newArr[0] ? $newArr[0] : null;
 					array_push($options['optionValues'], $optionValues);
 				}
 				array_push($product['options'], $options);
@@ -113,8 +113,8 @@ class Cart_model extends CI_Model
 			// Type
 			$type = $this->db->select('*')->get_where($this->tblPropertyType, array('id' => $product['type']))->row_array();
 			$type['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $type['descriptions']);
-			// $type['description'] = customFilterArray($type['descriptions'], $term = 'language', $lang)[0];
-			$type['description'] = count($type['descriptions']) > 0 && $type['descriptions'][0] ? $type['descriptions'][0] : null;
+			$newArr = customFilterArray($type['descriptions'], $lang);
+			$type['description'] = count($newArr) > 0 && $newArr[0] ? $newArr[0] : null;
 			$product['type'] = $type;
 
 			return $product;

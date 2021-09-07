@@ -30,7 +30,7 @@ class Category extends REST_Controller
 		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
 		$filter = isset($_REQUEST['filter']) ? $_REQUEST['filter'] : 'admin';
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
-		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'es';
 		$code = isset($_REQUEST['code']) ? $_REQUEST['code'] : '';
 
 		$categories = $this->category->getCategoryList(0, $count, $page, $code, $store, $lang, $filter);
@@ -46,7 +46,7 @@ class Category extends REST_Controller
 		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
 		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
-		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'es';
 
 		$response = $this->category->getCategoryHierarchyList(0, $count, $page, $store, $lang);
 		$this->response($response, REST_Controller::HTTP_OK);
@@ -56,7 +56,7 @@ class Category extends REST_Controller
 	{
 		$id = isset($_REQUEST['id']) ? $_REQUEST['id'] : 0;
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
-		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'es';
 		$response = $this->category->getCategoryDetailById($id, null, $store, $lang);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
@@ -64,15 +64,14 @@ class Category extends REST_Controller
 	public function manufacturers_get()
 	{
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
-		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'es';
 		$response = $this->category->getManufacturers($store, $lang);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
 	public function variants_post()
 	{
-		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
-		$response = $this->category->getVariants($this->post(), $lang);
+		$response = $this->category->getVariants($this->post());
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 

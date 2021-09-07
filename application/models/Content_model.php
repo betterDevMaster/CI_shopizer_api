@@ -17,8 +17,8 @@ class Content_model extends CI_Model
 	{
 		$content = $this->db->select('*')->get($this->tblContent)->row_array();
 		$content['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $content['descriptions']);
-		// $content['description'] = customFilterArray($content['descriptions'], $term = 'language', $lang)[0];
-		$content['description'] = count($content['descriptions']) > 0 && $content['descriptions'][0] ? $content['descriptions'][0] : null;
+		$newArr = customFilterArray($content['descriptions'], $lang);
+		$content['description'] = count($newArr) > 0 && $newArr[0] ? $newArr[0] : null;
 		return $content;
 	}
 
@@ -35,8 +35,8 @@ class Content_model extends CI_Model
 		foreach ($contents as $k1 => $v1) {
 			if (!$v1) continue;
 			$contents[$k1]['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $v1['descriptions']);
-			// $contents[$k1]['description']  = customFilterArray($contents[$k1]['descriptions'], $term = 'language', $lang)[0];
-			$contents[$k1]['description'] = count($contents[$k1]['descriptions']) > 0 && $contents[$k1]['descriptions'][0] ? $contents[$k1]['descriptions'][0] : null;
+			$newArr = customFilterArray($contents[$k1]['descriptions'], $lang);
+			$contents[$k1]['description'] = count($newArr) > 0 && $newArr[0] ? $newArr[0] : null;
 		}
 		$result = array($recordsTotal, $totalPages, $contents);
 		return $result;
@@ -66,8 +66,8 @@ class Content_model extends CI_Model
 
 		$contents = $this->db->select('*')->get_where($this->tblContent, $where)->row_array();
 		$contents['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $contents['descriptions']);
-		// $contents['description']  = customFilterArray($contents['descriptions'], $term = 'language', $lang)[0];
-		$contents['description'] = count($contents['descriptions']) > 0 && $contents['descriptions'][0] ? $contents['descriptions'][0] : null;
+		$newArr = customFilterArray($contents['descriptions'], $lang);
+		$contents['description'] = count($newArr) > 0 && $newArr[0] ? $newArr[0] : null;
 		return $contents;
 	}
 

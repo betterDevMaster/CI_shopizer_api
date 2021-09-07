@@ -120,7 +120,7 @@ class Modules extends REST_Controller
 
 	public function taxClass_get($code = null)
 	{
-		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'es';
 		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
 		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
 		$response = $this->module->getTaxModule($lang, $count, $page, $code, $this->tblTax);
@@ -157,7 +157,7 @@ class Modules extends REST_Controller
 	
 	public function taxRates_get($id = null)
 	{
-		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'es';
 		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
 		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
 		$response = $this->module->getTaxModule($lang, $count, $page, $id, $this->tblTaxRate);

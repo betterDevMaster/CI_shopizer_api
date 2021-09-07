@@ -13,7 +13,7 @@ class Store_model extends CI_Model
 		parent::__construct();
 	}
 
-	function getDefault($store, $names, $list, $count = null)
+	function getStoreById($store, $names, $list, $count = null)
 	{
 		if (!$list) {
 			if (!$names)
@@ -46,7 +46,7 @@ class Store_model extends CI_Model
 		return $default;
 	}
 
-	function update_Store($pData, $update = true)
+	function updateStore($pData, $update = true)
 	{
 		// Update Delivery address table
 		$delivery = array(

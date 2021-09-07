@@ -42,9 +42,7 @@ class Customer extends REST_Controller
 
 	public function country_get()
 	{
-		$lang = null;
-		if (isset($_REQUEST['lang']))
-			$lang = $_REQUEST['lang'];
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'es';
 		$response = $this->customer->get_CountryZonesList($lang);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
@@ -155,7 +153,7 @@ class Customer extends REST_Controller
 	function list_get($id = null)
 	{
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
-		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'es';
 		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
 		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
 		$customers = $this->customer->getList($store, $lang, $count, $page, $id);
@@ -179,7 +177,7 @@ class Customer extends REST_Controller
 	function orders_get($id = null)
 	{
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
-		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'es';
 		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
 		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
 		$response = null;

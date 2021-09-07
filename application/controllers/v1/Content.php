@@ -34,7 +34,7 @@ class Content extends REST_Controller
 	public function pages_get($uniqueCode = null, $box = false)
 	{
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
-		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'es';
 		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
 		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
 		if (!$uniqueCode) {
@@ -49,7 +49,7 @@ class Content extends REST_Controller
 	public function category_get()
 	{
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
-		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'es';
 		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
 		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
 		$content = $this->content->getCategory($page, $count, $store, $lang, null);
@@ -59,7 +59,7 @@ class Content extends REST_Controller
 
 	public function pageDetail_post()
 	{
-		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'en';
+		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'es';
 		$response = $this->content->get_PageDetail($this->post(), $lang);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}

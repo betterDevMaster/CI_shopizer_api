@@ -24,25 +24,19 @@ class Stores extends REST_Controller
 		$this->load->model('store_model', 'store');
 	}
 
-	public function list_get()
+	public function store_get($store = 'DEFAULT', $names = false, $list = false)
 	{
-		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
-		$stores = $this->store->getDefault('DEFAULT', false, true, $count);
-
-		$recordsTotal = $this->db->from($this->tblStore)->count_all_results();
-		$totalPages = ceil($recordsTotal / $count);
-		$response = array('data' => $stores, 'number' => count($stores), 'recordsFiltered' => 0, 'recordsTotal' => $recordsTotal, 'totalPages' => $totalPages);
-
+		$response = $this->store->getStoreById($store, $names, $list);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
-	public function update_put()
+	public function store_put()
 	{
-		$this->store->update_Store($this->put(), true);
+		$this->store->updateStore($this->put(), true);
 		$this->response($this->put(), REST_Controller::HTTP_OK);
 	}
 
-	public function deleteStore_delete()
+	public function store_delete()
 	{
 		$response =	$this->common->delete_TableRecordWithCondition(array('code' => $_REQUEST['store']), $this->tblStore);
 		$this->response($response, REST_Controller::HTTP_OK);
@@ -55,9 +49,34 @@ class Stores extends REST_Controller
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
-	public function createStore_post()
+	public function store_post()
 	{
-		$this->store->update_Store($this->post(), false);
+		$this->store->updateStore($this->post(), false);
 		$this->response($this->post(), REST_Controller::HTTP_OK);
 	}
+	
+	public function names_get()
+	{
+		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : null;
+		$response = $this->store_get($store, true, false);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
+	public function list_get()
+	{
+		$start = isset($_REQUEST['start']) ? (int)$_REQUEST['start'] : 0;
+		$length = isset($_REQUEST['length']) ? (int)$_REQUEST['length'] : 1000;
+		$retailers = isset($_REQUEST['retailers']) ? $_REQUEST['retailers'] : true;
+		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
+		$count = isset($_REQUEST['count']) ? (int)$_REQUEST['count'] : 10;
+		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
+
+		$stores = $this->store->getStoreById($store, false, true, $count);
+		$recordsTotal = $this->db->from($this->tblStore)->count_all_results();
+		$totalPages = ceil($recordsTotal / $count);
+		$response = array('data' => $stores, 'number' => count($stores), 'recordsFiltered' => 0, 'recordsTotal' => $recordsTotal, 'totalPages' => $totalPages);
+
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
+
 }
