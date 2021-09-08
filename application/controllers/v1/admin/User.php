@@ -123,4 +123,11 @@ class User extends REST_Controller
 		$response = array('measures' => $measures, 'weights' => $weights);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
+
+	public function signup_post()
+	{
+		$customer_id = $this->admin->createNewUser($this->post());
+		$response = array('id' => $customer_id, 'token' => md5($customer_id));
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
 }

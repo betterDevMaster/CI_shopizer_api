@@ -15,13 +15,16 @@ class Rest_server extends CI_Controller
 
 	function createImageFromBase64()
 	{
-		$wdata = $this->db->get('tbl_logo')->result_array();
+		$wdata = $this->db->get('tbl_image')->result_array();
 		foreach ($wdata as $v) {
-			$base64img = $v['path'];
-			$file_name = $v['name'];
+			$base64img = $v['baseImage'];
+			$file_name = $v['imageName'];
+			$target_file_name = str_replace('%20', '-', $file_name);
 			// $file_name = $v['name'] . '.png';
-			$target_dir = "assets/logo/";
-			$target_file = $target_dir . $file_name;
+			$target_dir = "assets/product/";
+			$target_file = $target_dir . $target_file_name;
+			echo 'fileNmae; --------- '.$file_name.'   ';
+			$this->db->where(array('imageName' => $file_name))->update('tbl_image', array('imageUrl' => '/assets/product/'.$target_file_name));
 
 			if (!file_exists($target_dir)) {
 				mkdir($target_dir, 0777, true);

@@ -89,15 +89,41 @@ class Category extends REST_Controller
 
 	public function createCategoryImage_post($id)
 	{
-		$response = array('status' => false, 'message' => 'image open failed');
+		$response = array('status' => false, 'message' => 'image create failed');
 		if (isset($_FILES['file'])) {
+			$target_dir = "assets/product/";
 			$file_tmp = $_FILES['file']['tmp_name'];
 			$data = file_get_contents($file_tmp);
 			$file_name = preg_replace('/\s+/', '', basename($_FILES["file"]["name"]));
-			$response =	$this->category->addCategoryImage($file_name, base64_encode($data), $id);
+
+			$target_file = $target_dir . $file_name;
+
+			if (!file_exists($target_dir)) {
+				mkdir($target_dir, 0777, true);
+			}
+
+			if (!file_exists($target_file)) {
+				if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
+					$response =	$this->category->addCategoryImage($file_name, $target_file, $id);
+				} else {
+					$response = array('success' => false, 'error' => 'File Existed', 'preventRetry' => false);
+				}
+			} else {
+				$response = array('success' => true, 'error' => null, 'preventRetry' => true);
+			}
+			// $file_tmp = $_FILES['file']['tmp_name'];
+			// $data = file_get_contents($file_tmp);
+			// $file_name = preg_replace('/\s+/', '', basename($_FILES["file"]["name"]));
+			// $response =	$this->category->addCategoryImage($file_name, base64_encode($data), $id);
 			$this->response($response, REST_Controller::HTTP_OK);
 		} else
 			$this->response($response, REST_Controller::HTTP_NOT_FOUND);
+	}
+
+	public function deleteCategoryImage_delete($id)
+	{
+		$response =	$this->category->deleteCategoryImage($id);
+		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
 	public function visible_post()

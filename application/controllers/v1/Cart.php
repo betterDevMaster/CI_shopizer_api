@@ -23,8 +23,8 @@ class Cart extends REST_Controller
 
 	public function addCart_post()
 	{
-		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'es';
-		$response = $this->cart->get_AddCart($this->post(), $lang);
+		$code = $this->post('code');
+		$response = $this->cart->get_AddCart($this->post(), $code);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 

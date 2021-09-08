@@ -43,7 +43,7 @@ class Product extends REST_Controller
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
 		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'es';
 		$page = isset($_REQUEST['page']) ? (int)$_REQUEST['page'] : 0;
-		$products = $this->product->getProductList($count, $store, $lang, $page);
+		$products = $this->product->getProductLists($count, $store, $lang, $page);
 		$response = array('products' => $products[2], 'number' => count($products[2]), 'recordsFiltered' => 0, 'recordsTotal' => $products[0], 'totalPages' => $products[1]);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
@@ -74,8 +74,7 @@ class Product extends REST_Controller
 		$category = isset($_REQUEST['category']) ? (int)$_REQUEST['category'] : 0;
 		$manufacturer = isset($_REQUEST['manufacturer']) ? $_REQUEST['manufacturer'] : null;
 		$promo = isset($_REQUEST['promo']) ? true : false;
-
-		$products = $this->product->getProductList($count, $store, $lang, $page, $category, $manufacturer, $promo);
+		$products = $this->product->getProductLists($count, $store, $lang, $page, $category, $manufacturer, $promo);
 		$response = array('products' => $products[2], 'number' => count($products[2]), 'recordsFiltered' => 0, 'recordsTotal' => $products[0], 'totalPages' => $products[1]);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
@@ -141,12 +140,28 @@ class Product extends REST_Controller
 
 	public function addImage_post($id)
 	{
-		$response = array('status' => false, 'message' => 'image open failed');
+		$response = array('status' => false, 'message' => 'image add failed');
 		if (isset($_FILES['file'])) {
+			$target_dir = "assets/product/";
 			$file_tmp = $_FILES['file']['tmp_name'];
 			$data = file_get_contents($file_tmp);
 			$file_name = preg_replace('/\s+/', '', basename($_FILES["file"]["name"]));
-			$response =	$this->product->addImage($file_name, base64_encode($data), $id);
+
+			$target_file = $target_dir . $file_name;
+
+			if (!file_exists($target_dir)) {
+				mkdir($target_dir, 0777, true);
+			}
+
+			if (!file_exists($target_file)) {
+				if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
+					$response =	$this->product->addImage($file_name, $target_file, $id);
+				} else {
+					$response = array('success' => false, 'error' => 'File Existed', 'preventRetry' => false);
+				}
+			} else {
+				$response = array('success' => true, 'error' => null, 'preventRetry' => true);
+			}
 			$this->response($response, REST_Controller::HTTP_OK);
 		} else
 			$this->response($response, REST_Controller::HTTP_NOT_FOUND);
@@ -291,18 +306,40 @@ class Product extends REST_Controller
 	{
 		$response = array('status' => false, 'message' => 'image open failed');
 		if (isset($_FILES['file'])) {
+			$target_dir = "assets/optionValue/";
 			$file_tmp = $_FILES['file']['tmp_name'];
 			$data = file_get_contents($file_tmp);
 			$file_name = preg_replace('/\s+/', '', basename($_FILES["file"]["name"]));
-			$this->product->createImage($file_name, base64_encode($data), $optionValueId);
+
+			$target_file = $target_dir . $file_name;
+
+			if (!file_exists($target_dir)) {
+				mkdir($target_dir, 0777, true);
+			}
+
+			if (!file_exists($target_file)) {
+				if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
+					$response =	$this->product->createImage($file_name, $target_file, $optionValueId);
+				} else {
+					$response = array('success' => false, 'error' => 'File Existed', 'preventRetry' => false);
+				}
+			} else {
+				$response = array('success' => true, 'error' => null, 'preventRetry' => true);
+			}
 			$this->response($response, REST_Controller::HTTP_OK);
+
+			// $file_tmp = $_FILES['file']['tmp_name'];
+			// $data = file_get_contents($file_tmp);
+			// $file_name = preg_replace('/\s+/', '', basename($_FILES["file"]["name"]));
+			// $this->product->createImage($file_name, base64_encode($data), $optionValueId);
+			// $this->response($response, REST_Controller::HTTP_OK);
 		} else
 			$this->response($response, REST_Controller::HTTP_NOT_FOUND);
 	}
 
-	public function deleteImage_delete()
+	public function deleteOptionValueImage_delete($id)
 	{
-		$response =	$this->common->delete_TableRecordWithCondition(array('id' => $_REQUEST['id']), $this->tblOptionValue);
+		$response =	$this->product->deleteOptionValueImage($id);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 

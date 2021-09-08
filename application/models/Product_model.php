@@ -269,9 +269,9 @@ class Product_model extends CI_Model
 		return true;
 	}
 
-	function addImage($file_name, $encodedImage, $id)
+	function addImage($file_name, $target_file, $id)
 	{
-		$this->db->insert($this->tblImage, array('imageName' => $file_name, 'baseImage' => $encodedImage));
+		$this->db->insert($this->tblImage, array('imageName' => $file_name, 'imageUrl' => '/' . $target_file));
 		$insertId = $this->db->insert_id();
 
 		$product = $this->db->select('image, images')->get_where($this->tblProducts, array('id' => $id))->row_array();
@@ -330,14 +330,42 @@ class Product_model extends CI_Model
 		return $products;
 	}
 
+	function getProductLists($count, $store, $lang, $page, $categoryId = null, $manufacturerId = null, $promo = false)
+	{
+		$ids = $this->getCategoryIDsWithChildByParent($categoryId);
+		if (count($ids) != 0) {
+			$productList = array();
+			foreach ($ids as $v) {
+				$productList = array_merge($productList, $this->getProductList($count, $store, $lang, $page, $v['id'], $manufacturerId, $promo));
+			}
+		} else {
+			$productList = $this->getProductList($count, $store, $lang, $page, $categoryId, $manufacturerId, $promo);
+		}
+		
+		$products = array_slice($productList, $count * $page, $count);
+		$recordsTotal = count($productList);
+		$totalPages = ceil($recordsTotal / $count);
+		$products = array($recordsTotal, $totalPages, $products);
+		return $products;
+	}
+
+	function getCategoryIDsWithChildByParent($id = 0)
+	{
+		$category = $this->db->select('id')->get_where($this->tblCategories, array('parent' => $id))->result_array();
+		for ($i = 0; $i < count($category); $i++) {
+			$category = array_merge($category, $this->getCategoryIDsWithChildByParent($category[$i]['id']));
+		}
+		return $category;
+	}
+
 	function getProductList($count, $store, $lang, $page, $categoryId = null, $manufacturerId = null, $promo = false)
 	{
 		if ($categoryId) {
 			$where = array('category' => $categoryId);
 			if ($promo) $where = array('category' => $categoryId, 'discounted' => true);
-			$products = $this->db->limit($count, $count * $page)->get_where($this->tblProducts, $where)->result_array();
+			$products = $this->db->get_where($this->tblProducts, $where)->result_array();
 		} else
-			$products = $this->db->limit($count, $count * $page)->get($this->tblProducts)->result_array();
+			$products = $this->db->get($this->tblProducts)->result_array();
 
 		$productList = array();
 		if ($manufacturerId) {
@@ -356,14 +384,6 @@ class Product_model extends CI_Model
 		foreach ($products as $k1 => $v1) {
 			$products[$k1] = $this->getDetailedProduct($products[$k1], $count, $store, $lang, $page);
 		}
-
-		if ($categoryId)
-			$recordsTotal = $this->db->from($this->tblProducts)->where(array('category' => $categoryId))->count_all_results();
-		else
-			$recordsTotal = $this->db->from($this->tblProducts)->count_all_results();
-
-		$totalPages = ceil($recordsTotal / $count);
-		$products = array($recordsTotal, $totalPages, $products);
 
 		return $products;
 	}
@@ -555,7 +575,7 @@ class Product_model extends CI_Model
 		DeleteDescriptionsInTableWithCondition($this, $this->tblOptionValue, array('id' => $pData['id']));
 
 		$descriptions = '';
-		$enName = $pData['descriptions'][0]['name'];
+		// $enName = $pData['descriptions'][0]['name'];
 		foreach ($pData['descriptions'] as $k => $v) {
 			unset($v['id']);
 			$this->db->insert($this->tblDescription, $v);
@@ -569,10 +589,18 @@ class Product_model extends CI_Model
 			'selectedLanguage' => $pData['selectedLanguage'],
 			'store' => $pData['store'],
 			'descriptions' => $descriptions,
-			'name' => $enName,
+			// 'name' => $enName,
 		);
 		$this->db->where($where);
 		$this->db->update($this->tblOptionValue, $data);
+		return true;
+	}
+
+	function deleteOptionValueImage($id)
+	{
+		$where = array('id' => $id);
+		$this->db->where($where);
+		$this->db->update($this->tblOptionValue, array('image' => null));
 		return true;
 	}
 
@@ -585,10 +613,10 @@ class Product_model extends CI_Model
 		return $optionValues;
 	}
 
-	function createImage($file_name, $encodedImage, $id)
+	function createImage($file_name, $target_file, $id)
 	{
 		$this->db->where(array('id' => $id));
-		$this->db->update($this->tblOptionValue, array('image' => $encodedImage));
+		$this->db->update($this->tblOptionValue, array('image' => '/' . $target_file));
 		return true;
 	}
 

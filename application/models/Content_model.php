@@ -15,7 +15,7 @@ class Content_model extends CI_Model
 
 	function get_HeaderMessage($lang)
 	{
-		$content = $this->db->select('*')->get($this->tblContent)->row_array();
+		$content = $this->db->select('*')->get_where($this->tblContent, array('contentType' => 'PAGE'))->row_array();
 		$content['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $content['descriptions']);
 		$newArr = customFilterArray($content['descriptions'], $lang);
 		$content['description'] = count($newArr) > 0 && $newArr[0] ? $newArr[0] : null;
@@ -25,7 +25,7 @@ class Content_model extends CI_Model
 	function get_Pages($page, $count, $store, $lang, $boxes)
 	{
 		if (!$boxes)
-			$where = array('contentType' => null);
+			$where = array('contentType' => 'PAGE');
 		else
 			$where = array('contentType' => 'BOX');
 
@@ -119,6 +119,7 @@ class Content_model extends CI_Model
 				'order' => (int)$pData['order'],
 				'visible' => (int)$pData['visible'],
 				'descriptions' => $descriptions,
+				'contentType' => "PAGE",
 			);
 		} else {
 			$data = array(

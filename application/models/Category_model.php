@@ -132,9 +132,17 @@ class Category_model extends CI_Model
 		return array('id' => $id);
 	}
 
-	function addCategoryImage($file_name, $encodedImage, $id)
+	function addCategoryImage($file_name, $target_file, $id)
 	{
-		$this->db->where(array('id' => $id))->update($this->tblCategories, array('image' => $encodedImage));
+		$this->db->where(array('id' => $id))->update($this->tblCategories, array('image' => '/' . $target_file));
+		return true;
+	}
+
+	function deleteCategoryImage($id)
+	{
+		$where = array('id' => $id);
+		$this->db->where($where);
+		$this->db->update($this->tblCategories, array('image' => null));
 		return true;
 	}
 

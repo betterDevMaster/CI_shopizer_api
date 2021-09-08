@@ -91,4 +91,24 @@ class Admin_model extends CI_Model
 		$this->db->insert($this->tblUser, $pData);
 		return $this->db->insert_id();
 	}
+
+	function createNewUser($pData)
+	{
+		$userData = array(
+			'firstName' => $pData['firstName'],
+			'lastName' => $pData['lastName'],
+			'emailAddress' => $pData['email'],
+			'storeCode' => $pData['code'],
+			'storeName' => $pData['name'],
+			'password' => md5($pData['password']),
+			'postalCode' => $pData['postalCode'],
+			'country' => $pData['country'],
+			'countryCode' => $pData['countryCode'],
+			'stateProvince' => $pData['stateProvince'],
+			'userName' => $pData['email'],
+		);
+
+		$this->db->insert($this->tblUser, $userData);
+		return $this->db->insert_id();
+	}
 } // END

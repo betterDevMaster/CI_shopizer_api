@@ -132,6 +132,7 @@ class Content extends REST_Controller
 		$qquuid = isset($_REQUEST['qquuid']) ? $_REQUEST['qquuid'] : null;
 		$qqfilename = isset($_REQUEST['qqfilename']) ? $_REQUEST['qqfilename'] : null;
 		$qqtotalfilesize = isset($_REQUEST['qqtotalfilesize']) ? $_REQUEST['qqtotalfilesize'] : null;
+		$response = array('status' => false, 'message' => 'image add failed');
 		if (isset($_FILES['qqfile'])) {
 			$target_dir = "assets/contentImage/";
 			$file_tmp = $_FILES['qqfile']['tmp_name'];
@@ -153,8 +154,8 @@ class Content extends REST_Controller
 			} else {
 				$response = array('success' => true, 'error' => null, 'preventRetry' => true);
 			}
-		}
-
-		$this->response($response, REST_Controller::HTTP_OK);
+			$this->response($response, REST_Controller::HTTP_OK);
+		} else
+			$this->response($response, REST_Controller::HTTP_NOT_FOUND);
 	}
 }
