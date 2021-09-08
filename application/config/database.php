@@ -99,15 +99,15 @@ $query_builder = true;
 
 $db['default'] = array(
     'dsn' => '',
-    'hostname' => 'localhost',
-    'username' => 'root',
-    'password' => '',
-    'database' => 'shopizer',
+    // 'hostname' => 'localhost',
+    // 'username' => 'root',
+    // 'password' => '',
+    // 'database' => 'shopizer',
 
-    // 'hostname' => 'ggaming.ddns.net',
-	// 'username' => 'healthy',
-    // 'password' => 'Pass123!@#',
-    // 'database' => 'healthy',
+    'hostname' => 'ggaming.ddns.net',
+	'username' => 'healthy',
+    'password' => 'Pass123!@#',
+    'database' => 'healthy',
 
     'dbdriver' => 'mysqli',
     'dbprefix' => '',
