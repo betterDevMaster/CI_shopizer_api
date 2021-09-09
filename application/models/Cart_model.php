@@ -30,17 +30,17 @@ class Cart_model extends CI_Model
 	}
 
 	/*
-		** function: get_FullProduct(...)
+		** function: getFullProductDetails(...)
 		*** main Param: productId
 		**** get one product and get child categories by this product
 	*/
-	function get_FullProduct($productId = null, $lang = 'es')
+	function getFullProductDetails($productId = null, $lang = 'es')
 	{
-		$product = $this->db->select('*')->get_where($this->tblProducts, array('id' => $productId))->row_array();
+		$product = $this->db->get_where($this->tblProducts, array('id' => $productId))->row_array();
 		if ($product) {
 			$product['attributes'] = array();
 			// Categories
-			$category = $this->db->select('*')->get_where($this->tblCategories, array('id' => $product['category']))->row_array();
+			$category = $this->db->get_where($this->tblCategories, array('id' => $product['category']))->row_array();
 			$category['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $category['descriptions']);
 			$newArr = customFilterArray($category['descriptions'], $lang);
 			$category['description'] = count($newArr) > 0 && $newArr[0] ? $newArr[0] : null;
@@ -52,18 +52,18 @@ class Cart_model extends CI_Model
 			$product['description'] = count($newArr) > 0 && $newArr[0] ? $newArr[0] : null;
 
 			// Image
-			$product['image'] = $this->db->select('*')->get_where($this->tblImage, array('id' => $product['image']))->row_array();
+			$product['image'] = $this->db->get_where($this->tblImage, array('id' => $product['image']))->row_array();
 
 			// Images
 			$imageList = explode(',', $product['images']);
 			$product['images'] = array();
 			foreach ($imageList as $v4) {
-				$image = $this->db->select('*')->get_where($this->tblImage, array('id' => $v4))->row_array();
+				$image = $this->db->get_where($this->tblImage, array('id' => $v4))->row_array();
 				array_push($product['images'], $image);
 			}
 
 			// Manufacturer
-			$manufacturer = $this->db->select('*')->get_where($this->tblManufacturer, array('id' => $product['manufacturer']))->row_array();
+			$manufacturer = $this->db->get_where($this->tblManufacturer, array('id' => $product['manufacturer']))->row_array();
 			$manufacturer['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $manufacturer['descriptions']);
 			$newArr = customFilterArray($manufacturer['descriptions'], $lang);
 			$manufacturer['description'] = count($newArr) > 0 && $newArr[0] ? $newArr[0] : null;
@@ -74,12 +74,12 @@ class Cart_model extends CI_Model
 			$product['options'] = array();
 			foreach ($optionList as  $v5) {
 				if (!$v5) continue;
-				$options = $this->db->select('*')->get_where($this->tblOptions, array('id' => $v5))->row_array();
+				$options = $this->db->get_where($this->tblOptions, array('id' => $v5))->row_array();
 				$optionValuesList = explode(',', $options['optionValues']);
 				$options['optionValues'] = array();
 				foreach ($optionValuesList as  $v7) {
 					if (!$v7) continue;
-					$optionValues = $this->db->select('*')->get_where($this->tblOptionValues, array('id' => $v7))->row_array();
+					$optionValues = $this->db->get_where($this->tblOptionValues, array('id' => $v7))->row_array();
 					$optionValues['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $optionValues['descriptions']);
 					$newArr = customFilterArray($optionValues['descriptions'], $lang);
 					$optionValues['description'] = count($newArr) > 0 && $newArr[0] ? $newArr[0] : null;
@@ -89,29 +89,29 @@ class Cart_model extends CI_Model
 			}
 
 			// Product Price
-			$productPrice = $this->db->select('*')->get_where($this->tblProductPrice, array('id' => $product['productPrice']))->row_array();
-			$productPrice['description'] = $this->db->select('*')->get_where($this->tblDescription, array('id' => $productPrice['description']))->row_array();
+			$productPrice = $this->db->get_where($this->tblProductPrice, array('id' => $product['productPrice']))->row_array();
+			$productPrice['description'] = $this->db->get_where($this->tblDescription, array('id' => $productPrice['description']))->row_array();
 			$product['productPrice'] = $productPrice;
 
 			// Product Specification
-			$productSpecification = $this->db->select('*')->get_where($this->tblProductSpecification, array('id' => $product['productSpecifications']))->row_array();
+			$productSpecification = $this->db->get_where($this->tblProductSpecification, array('id' => $product['productSpecifications']))->row_array();
 			$product['productSpecifications'] = $productSpecification;
 
 			// Properties
 			$propertyList = explode(',', $product['properties']);
 			$product['properties'] = array();
 			foreach ($propertyList as  $v8) {
-				$properties = $this->db->select('*')->get_where($this->tblProperties, array('id' => $v8))->row_array();
-				$property = $this->db->select('*')->get_where($this->tblProperty, array('id' => $properties['property']))->row_array();
+				$properties = $this->db->get_where($this->tblProperties, array('id' => $v8))->row_array();
+				$property = $this->db->get_where($this->tblProperty, array('id' => $properties['property']))->row_array();
 				if (!$property['optionValues']) $property['optionValues'] = array();
-				$propertyValue = $this->db->select('*')->get_where($this->tblPropertyValue, array('id' => $properties['propertyValue']))->row_array();
+				$propertyValue = $this->db->get_where($this->tblPropertyValue, array('id' => $properties['propertyValue']))->row_array();
 				if (!$propertyValue['values']) $propertyValue['values'] = array();
 				$properties['property'] = $property;
 				$properties['propertyValue'] = $propertyValue;
 				array_push($product['properties'], $properties);
 			}
 			// Type
-			$type = $this->db->select('*')->get_where($this->tblPropertyType, array('id' => $product['type']))->row_array();
+			$type = $this->db->get_where($this->tblPropertyType, array('id' => $product['type']))->row_array();
 			$type['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $type['descriptions']);
 			$newArr = customFilterArray($type['descriptions'], $lang);
 			$type['description'] = count($newArr) > 0 && $newArr[0] ? $newArr[0] : null;
@@ -122,37 +122,64 @@ class Cart_model extends CI_Model
 	}
 
 	/*
-		** function: get_AddCart(...)
+		** function: getCartByCode(...)
 		*** main Param: customer, code, products, quantity
 		**** param desc: products & quantity format: 1,2,3,4
 	*/
-	function get_AddCart($pData = null, $cart = null, $promoCart = null, $lang = null)
+
+	function getCartByCode($cart, $lang, $store)
 	{
-		if (!$cart) {
-			$customerId = isset($pData['customerId']) ? $pData['customerId'] : $this->uniqueCode(mt_rand(10000000, 99999999));
-			$where = array('customer' => $customerId);
-			$data = $this->db->get_where($this->tblCart, $where)->row_array();
-			$data['code'] = md5($customerId);
-			$data['customer'] = $customerId;
-		} else {
-			if (!IsNullOrEmptyString($promoCart)) {
-				$this->db->set('promoCode', $promoCart); //value that used to update column
-				$this->db->where('code', $cart); //which row want to upgrade
-				$this->db->update($this->tblCart); //table name
+		$where = array('code' => $cart);
+		$data = $this->db->get_where($this->tblCart, $where)->row_array();
+
+		if ($data) {
+			$products = explode(',', $data['products']);
+			$quantities = explode(',', $data['quantity']);
+
+			// Get the whole products detail
+			$data['products'] = array();
+			$totalPrice  = 0;
+			$curTotalPrice = 0;
+			foreach ($products as $k3 => $v3) {
+				if (!$v3) continue;
+				$product = $this->getFullProductDetails($v3, $lang);
+				$curTotalPrice = (int)$product['price'] * (int)$quantities[$k3];
+				$totalPrice  = $curTotalPrice + $totalPrice;
+				$product['quantity'] = (int)$quantities[$k3];
+				$product['subTotal'] = $product['total'] = $curTotalPrice;
+				$product['displaySubTotal'] = $product['displayTotal'] = "USD" . number_format($curTotalPrice, 2);
+				array_push($data['products'], $product);
 			}
-			$where = array('code' => $cart);
-			$data = $this->db->get_where($this->tblCart, $where)->row_array();
+
+			// Calc whole quantity
+			$quantity = 0;
+			foreach ($quantities as $k4 => $v4) {
+				if (!$v4) continue;
+				$quantity = $quantity + (int)$v4;
+			}
+
+			$data['quantity'] = $quantity;
+			$data['total'] = $data['subTotal'] = $totalPrice;
+			$data['displayTotal'] = $data['displaySubTotal'] = "USD" . number_format($totalPrice, 2);
+			$data['totals'] = $this->db->get($this->tblTotal)->result_array();
+			$data['totals'][0]['value'] = number_format($curTotalPrice, 2);
+			$data['totals'][1]['value'] = number_format($curTotalPrice, 2);
+
+			$this->db->where($where)->update($this->tblCart, array('total' => $totalPrice, 'subTotal' => $totalPrice));
 		}
+		return $data;
+	}
 
-		if (!$data) return;
+	function addNewCart($pData)
+	{
+		if (isset($pData['code'])) {
+			$where = array('code' => $pData['code']);
+			$data = $this->db->get_where($this->tblCart, $where)->row_array();
 
-		if (count($data) > 0 && isset($data['products']) && $data['quantity']) {
 			$dupliCatedProductId = false;
 
 			$products = explode(',', $data['products']);
 			$quantities = explode(',', $data['quantity']);
-
-			// if (!$cart) {
 
 			// Update current record product & quantity
 			foreach ($products as $k1 => $v1) {
@@ -181,52 +208,144 @@ class Cart_model extends CI_Model
 			}
 			$this->db->where($where);
 			$this->db->update($this->tblCart, $data);
-			// }
 		} else {
-			$data['products'] = $pData['productId'] . ',';
-			$data['quantity'] = $pData['quantity'] . ',';
-			$this->db->insert($this->tblCart, $data);
-			$inserId = $this->db->insert_id();
-			$data = $this->db->get_where($this->tblCart, array('id' => $inserId))->row_array();
-			$products = explode(',', $data['products']);
-			$quantities = explode(',', $data['quantity']);
+			if (isset($pData['customerId'])) {
+				$newData['products'] = $pData['productId'] . ',';
+				$newData['quantity'] = $pData['quantity'] . ',';
+				$newData['customer'] = $pData['customerId'];
+				$newData['code'] = md5($pData['customerId']);
+				$this->db->insert($this->tblCart, $newData);
+				return $newData['code'];
+			} else {
+				$newData['products'] = $pData['productId'] . ',';
+				$newData['quantity'] = $pData['quantity'] . ',';
+				$newData['customer'] = $this->uniqueCode(mt_rand(10000000, 99999999));
+				$newData['code'] = md5($this->uniqueCode(mt_rand(10000000, 99999999)));
+				$this->db->insert($this->tblCart, $newData);
+				return $newData['code'];
+			}
 		}
+		return $pData['code'];
+	}
 
-		$totals = $this->db->select('*')->get($this->tblTotal)->result_array();
+	// function get_AddCart($pData = null, $cart = null, $promoCart = null, $lang = null, $customer = null)
+	// {
+	// 	if (!$cart) {
+	// 		$customerId = isset($pData['customerId']) ? $pData['customerId'] : $this->uniqueCode(mt_rand(10000000, 99999999));
+	// 		$where = array('customer' => $customerId);
+	// 		$data = $this->db->get_where($this->tblCart, $where)->row_array();
+	// 		$data['code'] = md5($customerId);
+	// 		$data['customer'] = $customerId;
+	// 	} else {
+	// 		if (!IsNullOrEmptyString($promoCart)) {
+	// 			$this->db->set('promoCode', $promoCart); //value that used to update column
+	// 			$this->db->where('code', $cart); //which row want to upgrade
+	// 			$this->db->update($this->tblCart); //table name
+	// 		}
+	// 		$where = array('code' => $cart);
+	// 		$data = $this->db->get_where($this->tblCart, $where)->row_array();
+	// 	}
 
-		// Get the whole products detail
-		$data['products'] = array();
-		$totalPrice  = 0;
-		// var_dump($products);
-		foreach ($products as $k3 => $v3) {
-			if (!$v3) continue;
-			$product = $this->get_FullProduct($v3);
-			$curTotalPrice = $product['price'] * (int)$quantities[$k3];
-			$totalPrice  = $curTotalPrice + $totalPrice;
-			$product['quantity'] = (int)$quantities[$k3];
-			$product['subTotal'] = $product['total'] = $curTotalPrice;
-			$product['displaySubTotal'] = $product['displayTotal'] = "USD" . number_format($curTotalPrice, 2);
-			array_push($data['products'], $product);
-		}
+	// 	if ($data && isset($data['products']) && $data['quantity']) {
+	// 		$dupliCatedProductId = false;
 
-		// Calc whole quantity
-		$quantity = 0;
-		foreach ($quantities as $k4 => $v4) {
-			if (!$v4) continue;
-			$quantity = $quantity + (int)$v4;
-		}
+	// 		$products = explode(',', $data['products']);
+	// 		$quantities = explode(',', $data['quantity']);
 
-		$data['quantity'] = $quantity;
-		$data['total'] = $data['subTotal'] = $totalPrice;
-		$data['displayTotal'] = $data['displaySubTotal'] = "USD" . number_format($totalPrice, 2);
-		$data['totals'] = $totals;
-		$data['totals'][0]['value'] = number_format($curTotalPrice, 2);
-		$data['totals'][1]['value'] = number_format($curTotalPrice, 2);
+	// 		// Update current record product & quantity
+	// 		foreach ($products as $k1 => $v1) {
+	// 			if (!$v1) continue;
+	// 			if ($v1 == $pData['productId']) {
+	// 				$quantities[$k1] = $pData['quantity'];
+	// 				$dupliCatedProductId = true;
+	// 			}
+	// 		}
+	// 		if (!$dupliCatedProductId) {
+	// 			$data['products'] = $data['products'] . $pData['productId'] . ',';
+	// 			$data['quantity'] = $data['quantity'] . $pData['quantity'] . ',';
+	// 		} else {
+	// 			// update quantity & product when productID duplicates on the products
+	// 			$data['products'] = '';
+	// 			$data['quantity'] = '';
+	// 			foreach ($quantities as $k2 => $v2) {
+	// 				if ($v2 == 0) unset($products[$k2]);
+	// 				if (!$v2) continue;
+	// 				$data['quantity'] = $data['quantity'] . $v2 . ',';
+	// 			}
+	// 			foreach ($products as $k4 => $v4) {
+	// 				if (!$v4) continue;
+	// 				$data['products'] = $data['products'] . $v4 . ',';
+	// 			}
+	// 		}
+	// 		$this->db->where($where);
+	// 		$this->db->update($this->tblCart, $data);
+	// 	} else {
+	// 		// Insert New cart when login
+	// 		$newData['products'] = isset($pData['productId']) ? $pData['productId'] . ',' : null;
+	// 		$newData['quantity'] = isset($pData['quantity']) ? $pData['quantity'] . ',' : null;
+	// 		$newData['code'] = $cart;
+	// 		$newData['customer'] = isset($pData['customerId']) ? $pData['customerId'] : $customer;
 
-		$this->db->where($where);
-		$this->db->update($this->tblCart, array('total' => $totalPrice, 'subTotal' => $totalPrice));
+	// 		$data = $this->db->get_where($this->tblCart, array('code' => $cart))->row_array();
+	// 		if ($data) {
+	// 			$this->db->where(array('code' => $cart))->update($this->tblCart, $newData);
+	// 		} else {
+	// 			$this->db->insert($this->tblCart, $newData);
+	// 			$id = $this->db->insert_id();
+	// 			$data = $this->db->get_where($this->tblCart, array('id' => $id))->row_array();
+	// 		}
+	// 		$products = explode(',', $data['products']);
+	// 		$quantities = explode(',', $data['quantity']);
+	// 	}
 
-		return $data;
+	// 	$totals = $this->db->get($this->tblTotal)->result_array();
+
+	// 	// Get the whole products detail
+	// 	$data['products'] = array();
+	// 	$totalPrice  = 0;
+	// 	$curTotalPrice = 0;
+	// 	foreach ($products as $k3 => $v3) {
+	// 		if (!$v3) continue;
+	// 		$product = $this->getFullProductDetails($v3);
+	// 		$curTotalPrice = $product['price'] * (int)$quantities[$k3];
+	// 		$totalPrice  = $curTotalPrice + $totalPrice;
+	// 		$product['quantity'] = (int)$quantities[$k3];
+	// 		$product['subTotal'] = $product['total'] = $curTotalPrice;
+	// 		$product['displaySubTotal'] = $product['displayTotal'] = "USD" . number_format($curTotalPrice, 2);
+	// 		array_push($data['products'], $product);
+	// 	}
+
+	// 	// Calc whole quantity
+	// 	$quantity = 0;
+	// 	foreach ($quantities as $k4 => $v4) {
+	// 		if (!$v4) continue;
+	// 		$quantity = $quantity + (int)$v4;
+	// 	}
+
+	// 	$data['quantity'] = $quantity;
+	// 	$data['total'] = $data['subTotal'] = $totalPrice;
+	// 	$data['displayTotal'] = $data['displaySubTotal'] = "USD" . number_format($totalPrice, 2);
+	// 	$data['totals'] = $totals;
+	// 	$data['totals'][0]['value'] = number_format($curTotalPrice, 2);
+	// 	$data['totals'][1]['value'] = number_format($curTotalPrice, 2);
+
+	// 	$this->db->where($where)->update($this->tblCart, array('total' => $totalPrice, 'subTotal' => $totalPrice));
+
+	// 	return $data;
+	// }
+
+	function updateCartWithCustomerIDWhenLogin($customer_id, $existingToken)
+	{
+		$originRecord = $this->db->get_where($this->tblCart, array('customer' => $customer_id))->row_array();
+		$newRecord = $this->db->get_where($this->tblCart, array('code' => $existingToken))->row_array();
+		$newRecord['customer'] = $customer_id;
+		// if (count($originRecord) > 0) {
+		// 	$newRecord['products'] = $newRecord['products'] . $originRecord['products'];
+		// 	$newRecord['quantity'] = $newRecord['quantity'] . $originRecord['quantity'];
+
+		// 	$this->db->where(array('customer' => $customer_id))->delete($this->tblCart);
+		// }
+		$this->db->where(array('code' => $existingToken))->update($this->tblCart, $newRecord);
 	}
 
 	function uniqueCode($rndNum)
@@ -238,51 +357,61 @@ class Cart_model extends CI_Model
 			return $rndNum;
 	}
 
-	function get_UserCart($cart, $lang, $store)
+	// function get_UserCart($cart, $customer, $lang, $store)
+	// {
+	// 	$cart = $this->get_AddCart(null, $cart, null, $lang, $customer);
+	// 	return $cart;
+	// }
+
+	// function get_UserPromoCart($pData)
+	// {
+	// 	$cart = $this->get_AddCart(null, $pData['code'], $pData['promoCart'], $pData['lang']);
+	// 	return $cart;
+	// }
+
+	function updateCartPromo($pData)
 	{
-		$cart = $this->get_AddCart(null, $cart, null, $lang);
-		return $cart;
-	}
-
-	function get_UserPromoCart($pData, $lang)
-	{
-		$cart = $this->get_AddCart(null, $pData['code'], $pData['promoCart'], $lang);
-		return $cart;
-	}
-
-	function get_UpdateCart($pData, $lang)
-	{
-		$where = array('code' => $pData['code']);
-		$data = $this->db->get_where($this->tblCart, $where)->row_array();
-
-		if (!$data) return;
-
-		$products = explode(',', $data['products']);
-		$quantities = explode(',', $data['quantity']);
-
-		foreach ($products as $k1 => $v1) {
-			if (!$v1) continue;
-			if ($v1 == $pData['productId']) {
-				$quantities[$k1] = $pData['quantity'];
-			}
-		}
-
-		$quantity = '';
-		foreach ($quantities as $k2 => $v2) {
-			if (!$v2) continue;
-			$quantity = $quantity . $v2 . ',';
-		}
-
-		$where = array('code' => $pData['code']);
-		$data['quantity'] = $quantity;
+		$where = array('code' => $pData['cart']);
+		$data = array('promoCode' => $pData['promoCart'], 'language' => $pData['lang']);
 		$this->db->where($where);
 		$this->db->update($this->tblCart, $data);
-
-		$cart = $this->get_AddCart(null, $pData['code'], null, $lang);
+		$cart = $this->getCartByCode($pData['cart'], $pData['lang'], $pData['store']);
 		return $cart;
 	}
 
-	function get_DeleteCart($code, $productId, $store)
+	// function updateCart($pData, $lang)
+	// {
+	// 	$where = array('code' => $pData['code']);
+	// 	$data = $this->db->get_where($this->tblCart, $where)->row_array();
+
+	// 	if (!$data) return;
+
+	// 	$products = explode(',', $data['products']);
+	// 	$quantities = explode(',', $data['quantity']);
+
+	// 	foreach ($products as $k1 => $v1) {
+	// 		if (!$v1) continue;
+	// 		if ($v1 == $pData['productId']) {
+	// 			$quantities[$k1] = $pData['quantity'];
+	// 		}
+	// 	}
+
+	// 	$quantity = '';
+	// 	foreach ($quantities as $k2 => $v2) {
+	// 		if (!$v2) continue;
+	// 		$quantity = $quantity . $v2 . ',';
+	// 	}
+
+	// 	$where = array('code' => $pData['code']);
+	// 	$data['quantity'] = $quantity;
+	// 	$this->db->where($where);
+	// 	$this->db->update($this->tblCart, $data);
+
+	// 	$cart = $this->get_AddCart(null, $pData['code'], null, $lang);
+	// 	return $cart;
+	// }
+
+	function deleteCart($code, $productId, $store)
 	{
 		$where = array('code' => $code);
 		$data = $this->db->get_where($this->tblCart, $where)->row_array();
@@ -322,13 +451,13 @@ class Cart_model extends CI_Model
 
 	function get_Shipping($pData)
 	{
-		$shipping = $this->db->select('*')->get($this->tblShipping)->row_array();
-		$shipping['delivery'] = $this->db->select('*')->get_where($this->tblUserDelivery, array('id' => $shipping['delivery']))->row_array();
+		$shipping = $this->db->get($this->tblShipping)->row_array();
+		$shipping['delivery'] = $this->db->get_where($this->tblUserDelivery, array('id' => $shipping['delivery']))->row_array();
 		$shippingOptions = explode(',', $shipping['shippingOptions']);
 		$shipping['shippingOptions'] = array();
 		foreach ($shippingOptions as $k => $v) {
 			if (!$v) continue;
-			$options = $this->db->select('*')->get_where($this->tblShippingOptions, array('id' => $v))->row_array();
+			$options = $this->db->get_where($this->tblShippingOptions, array('id' => $v))->row_array();
 			array_push($shipping['shippingOptions'], $options);
 		}
 
@@ -337,8 +466,8 @@ class Cart_model extends CI_Model
 
 	function get_Total($code, $quote = null)
 	{
-		$cart = $this->db->select('*')->get_where($this->tblCart, array('code' => $code))->row_array();
-		$totals = $this->db->select('*')->get($this->tblTotal)->result_array();
+		$cart = $this->db->get_where($this->tblCart, array('code' => $code))->row_array();
+		$totals = $this->db->get($this->tblTotal)->result_array();
 		$cart['totals'] = $totals;
 		$cart['totals'][0]['value'] = $cart['subTotal'];
 		$cart['totals'][1]['value'] = $cart['total'];

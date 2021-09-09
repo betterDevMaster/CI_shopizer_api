@@ -25,6 +25,7 @@ class Customer extends REST_Controller
 		// Ensure you have created the 'limits' table and enabled 'limits' within application/config/rest.php
 		$this->load->model('customer_model', 'customer');
 		$this->load->model('common_model', 'common');
+		$this->load->model('cart_model', 'cart');
 	}
 
 	public function ping_get()
@@ -67,27 +68,18 @@ class Customer extends REST_Controller
 			'userName' => $this->post('userName'),
 			'password' => md5($this->post('password')),
 		);
+		$existingToken = $this->post('existingToken');
 		$customer_id = $this->customer->check_Auth($data);
-
 		if ($customer_id) {
-			$response = array('id' => $customer_id, 'token' => md5($customer_id));
+			if ($existingToken) {
+				$response = array('id' => $customer_id, 'token' => $existingToken);
+				$this->cart->updateCartWithCustomerIDWhenLogin($customer_id, $existingToken);
+			} else {
+				$response = array('id' => $customer_id, 'token' => md5($customer_id));
+			}
+			$_SESSION['user_id'] = $customer_id;
+			$_SESSION['user_token'] = md5($customer_id);
 			$this->response($response, REST_Controller::HTTP_OK);
-
-			// if ($customer['status']) {
-			// 	$response = array(
-			// 		'status' => true,
-			// 		'message' => 'User login successful',
-			// 		'meta' => $customer['message'],
-			// 	);
-			// 	$this->response($response, REST_Controller::HTTP_OK);
-			// } else {
-			// 	$response = array(
-			// 		'status' => false,
-			// 		'message' => $customer['message'],
-			// 		'meta' => array(),
-			// 	);
-			// 	$this->response($response, REST_Controller::HTTP_OK);
-			// }
 		} else {
 			$response = array(
 				'status' => false,
@@ -95,6 +87,11 @@ class Customer extends REST_Controller
 			);
 			$this->response($response, REST_Controller::HTTP_NOT_FOUND);
 		}
+	}
+
+	public function logout_post()
+	{
+		$this->session->sess_destroy();
 	}
 
 	public function profile_get()

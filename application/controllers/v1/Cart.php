@@ -23,40 +23,44 @@ class Cart extends REST_Controller
 
 	public function addCart_post()
 	{
-		$code = $this->post('code');
-		$response = $this->cart->get_AddCart($this->post(), $code);
+		// $code = $this->post('code');
+		// $response = $this->cart->addNewCart($this->post(), $code);
+		$response = $this->cart->addNewCart($this->post());
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
 	public function getUserCart_get()
 	{
 		$code = isset($_REQUEST['code']) ? $_REQUEST['code'] : null;
+		$customer = isset($_REQUEST['customer']) ? $_REQUEST['customer'] : null;
 		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'es';
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
-		$response = $this->cart->get_UserCart($code, $lang, $store);
+		// $response = $this->cart->get_UserCart($code, $customer, $lang, $store);
+		$response = $this->cart->getCartByCode($code, $lang, $store);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
 	public function promo_post()
 	{
-		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'es';
-		$response = $this->cart->get_UserPromoCart($this->post(), $lang);
+		// $response = $this->cart->get_UserPromoCart($this->post());
+		// $response = $this->cart->getCartByCode($this->post('code'), null, $this->post('lang'), $this->post('promoCart'));
+		$response = $this->cart->updateCartPromo($this->post());
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
-	public function updateCart_post()
-	{
-		$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'es';
-		$response = $this->cart->get_updateCart($this->post(), $lang);
-		$this->response($response, REST_Controller::HTTP_OK);
-	}
+	// public function updateCart_post()
+	// {
+	// 	$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'es';
+	// 	$response = $this->cart->updateCart($this->post(), $lang);
+	// 	$this->response($response, REST_Controller::HTTP_OK);
+	// }
 
 	public function deleteCart_delete()
 	{
 		$code = isset($_REQUEST['code']) ? $_REQUEST['code'] : null;
 		$productId = isset($_REQUEST['productId']) ? $_REQUEST['productId'] : 0;
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
-		$response = $this->cart->get_DeleteCart($code, $productId, $store);
+		$response = $this->cart->deleteCart($code, $productId, $store);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
