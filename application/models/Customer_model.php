@@ -94,7 +94,7 @@ class Customer_model extends CI_Model
 			return null;
 	}
 
-	function get_UserProfile($id = null, $isAdmin = 0)
+	function getUserProfile($id = null, $isAdmin = 0)
 	{
 		if ($id)
 			$user = $this->db->select('*')->get_where($this->tblUser, array('id' => $id))->row_array();

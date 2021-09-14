@@ -11,6 +11,8 @@ require APPPATH . 'helpers/jwt_helper.php';
 
 class Cart extends REST_Controller
 {
+	public $tblCart = 'tbl_cart';
+
 	public function __construct()
 	{
 		// Construct the parent class
@@ -19,6 +21,7 @@ class Cart extends REST_Controller
 		// Configure limits on our controller methods
 		// Ensure you have created the 'limits' table and enabled 'limits' within application/config/rest.php
 		$this->load->model('cart_model', 'cart');
+		$this->load->model('common_model', 'common');
 	}
 
 	public function addCart_post()
@@ -48,19 +51,18 @@ class Cart extends REST_Controller
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
-	// public function updateCart_post()
-	// {
-	// 	$lang = isset($_REQUEST['lang']) ? $_REQUEST['lang'] : 'es';
-	// 	$response = $this->cart->updateCart($this->post(), $lang);
-	// 	$this->response($response, REST_Controller::HTTP_OK);
-	// }
+	public function deleteCart_delete($cardId)
+	{
+		$response =	$this->common->delete_TableRecordWithCondition(array('code' => $cardId), $this->tblCart);
+		$this->response($response, REST_Controller::HTTP_OK);
+	}
 
-	public function deleteCart_delete()
+	public function deleteProductOfCart_delete()
 	{
 		$code = isset($_REQUEST['code']) ? $_REQUEST['code'] : null;
 		$productId = isset($_REQUEST['productId']) ? $_REQUEST['productId'] : 0;
 		$store = isset($_REQUEST['store']) ? $_REQUEST['store'] : 'DEFAULT';
-		$response = $this->cart->deleteCart($code, $productId, $store);
+		$response = $this->cart->deleteProductOfCart($code, $productId, $store);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 

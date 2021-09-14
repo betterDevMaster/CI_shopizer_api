@@ -96,7 +96,7 @@ class Customer extends REST_Controller
 
 	public function profile_get()
 	{
-		$response = $this->customer->get_UserProfile($_REQUEST['id']);
+		$response = $this->customer->getUserProfile($_REQUEST['id']);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 

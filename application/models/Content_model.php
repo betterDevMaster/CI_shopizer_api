@@ -15,7 +15,7 @@ class Content_model extends CI_Model
 
 	function get_HeaderMessage($lang)
 	{
-		$content = $this->db->select('*')->get_where($this->tblContent, array('contentType' => 'PAGE'))->row_array();
+		$content = $this->db->select('*')->order_by('id',"desc")->limit(1)->get_where($this->tblContent, array('contentType' => 'PAGE'))->row_array();
 		$content['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $content['descriptions']);
 		$newArr = customFilterArray($content['descriptions'], $lang);
 		$content['description'] = count($newArr) > 0 && $newArr[0] ? $newArr[0] : null;

@@ -334,6 +334,7 @@ class Product_model extends CI_Model
 	{
 		$ids = $this->getCategoryIDsWithChildByParent($categoryId);
 		if (count($ids) != 0) {
+			array_push($ids, array('id' => $categoryId));
 			$productList = array();
 			foreach ($ids as $v) {
 				$productList = array_merge($productList, $this->getProductList($count, $store, $lang, $page, $v['id'], $manufacturerId, $promo));

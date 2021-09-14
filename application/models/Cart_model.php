@@ -379,39 +379,7 @@ class Cart_model extends CI_Model
 		return $cart;
 	}
 
-	// function updateCart($pData, $lang)
-	// {
-	// 	$where = array('code' => $pData['code']);
-	// 	$data = $this->db->get_where($this->tblCart, $where)->row_array();
-
-	// 	if (!$data) return;
-
-	// 	$products = explode(',', $data['products']);
-	// 	$quantities = explode(',', $data['quantity']);
-
-	// 	foreach ($products as $k1 => $v1) {
-	// 		if (!$v1) continue;
-	// 		if ($v1 == $pData['productId']) {
-	// 			$quantities[$k1] = $pData['quantity'];
-	// 		}
-	// 	}
-
-	// 	$quantity = '';
-	// 	foreach ($quantities as $k2 => $v2) {
-	// 		if (!$v2) continue;
-	// 		$quantity = $quantity . $v2 . ',';
-	// 	}
-
-	// 	$where = array('code' => $pData['code']);
-	// 	$data['quantity'] = $quantity;
-	// 	$this->db->where($where);
-	// 	$this->db->update($this->tblCart, $data);
-
-	// 	$cart = $this->get_AddCart(null, $pData['code'], null, $lang);
-	// 	return $cart;
-	// }
-
-	function deleteCart($code, $productId, $store)
+	function deleteProductOfCart($code, $productId, $store)
 	{
 		$where = array('code' => $code);
 		$data = $this->db->get_where($this->tblCart, $where)->row_array();
@@ -472,10 +440,14 @@ class Cart_model extends CI_Model
 		$cart['totals'][0]['value'] = $cart['subTotal'];
 		$cart['totals'][1]['value'] = $cart['total'];
 
-		$cart['totals'][0]['total'] = 'USD' . $cart['subTotal'];
-		$cart['totals'][1]['total'] = 'USD' . $cart['total'];
-		$cart['subTotal'] = 'USD' . $cart['subTotal'];
-		$cart['total'] = 'USD' . $cart['total'];
+		$cart['totals'][0]['total'] = $cart['subTotal'];
+		$cart['totals'][1]['total'] = $cart['total'];
+		$cart['subTotal'] = $cart['subTotal'];
+		$cart['total'] = $cart['total'];
+		// $cart['totals'][0]['total'] = 'USD' . $cart['subTotal'];
+		// $cart['totals'][1]['total'] = 'USD' . $cart['total'];
+		// $cart['subTotal'] = 'USD' . $cart['subTotal'];
+		// $cart['total'] = 'USD' . $cart['total'];
 		return $cart;
 	}
 } // END

@@ -31,7 +31,7 @@ class Category_model extends CI_Model
 
 	function getCategoryHierarchyList($id = 0, $count = null, $page = null, $store = null, $lang = null)
 	{
-		$category = $this->db->get_where($this->tblCategories, array('parent' => $id))->result_array();
+		$category = $this->db->get_where($this->tblCategories, array('parent' => $id, 'visible' => true))->result_array();
 		for ($i = 0; $i < count($category); $i++) {
 			$category[$i]['descriptions'] = GetTableDetails($this, $this->tblDescription, 'id', $category[$i]['descriptions']);
 			$newArr = customFilterArray($category[$i]['descriptions'], $lang);
@@ -124,7 +124,6 @@ class Category_model extends CI_Model
 			'sortOrder' => $pData['sortOrder'],
 			'store' => isset($pData['store']) ? $pData['store'] : 'DEFAULT',
 			'visible' => $pData['visible'],
-			'depth' => isset($pData['depth']) ? $pData['depth'] : 0,
 			'featured' => isset($pData['featured']) ? $pData['featured'] : false,
 		);
 		$this->db->insert($this->tblCategories, $data);

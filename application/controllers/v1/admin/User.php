@@ -52,7 +52,7 @@ class User extends REST_Controller
 
 	public function profile_get()
 	{
-		$response = $this->customer->get_UserProfile(null, 1);
+		$response = $this->customer->getUserProfile(null, 1);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
@@ -90,7 +90,7 @@ class User extends REST_Controller
 	public function createUser_post()
 	{
 		$userId = $this->admin->createUser($this->post());
-		$response = $this->customer->get_UserProfile($userId);
+		$response = $this->customer->getUserProfile($userId);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
@@ -106,7 +106,7 @@ class User extends REST_Controller
 
 	public function user_get()
 	{
-		$response = $this->customer->get_UserProfile($_REQUEST['userId']);
+		$response = $this->customer->getUserProfile($_REQUEST['userId']);
 		$this->response($response, REST_Controller::HTTP_OK);
 	}
 
