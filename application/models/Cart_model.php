@@ -206,6 +206,8 @@ class Cart_model extends CI_Model
 					$data['products'] = $data['products'] . $v4 . ',';
 				}
 			}
+			if (isset($data['id'])) unset($data['id']);
+
 			$this->db->where($where);
 			$this->db->update($this->tblCart, $data);
 		} else {
