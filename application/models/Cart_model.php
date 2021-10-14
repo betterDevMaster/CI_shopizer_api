@@ -143,9 +143,9 @@ class Cart_model extends CI_Model
 			foreach ($products as $k3 => $v3) {
 				if (!$v3) continue;
 				$product = $this->getFullProductDetails($v3, $lang);
-				$curTotalPrice = (int)$product['price'] * (int)$quantities[$k3];
+				$curTotalPrice = (float)$product['price'] * (float)$quantities[$k3];
 				$totalPrice  = $curTotalPrice + $totalPrice;
-				$product['quantity'] = (int)$quantities[$k3];
+				$product['quantity'] = (float)$quantities[$k3];
 				$product['subTotal'] = $product['total'] = $curTotalPrice;
 				$product['displaySubTotal'] = $product['displayTotal'] = "USD" . number_format($curTotalPrice, 2);
 				array_push($data['products'], $product);
@@ -155,7 +155,7 @@ class Cart_model extends CI_Model
 			$quantity = 0;
 			foreach ($quantities as $k4 => $v4) {
 				if (!$v4) continue;
-				$quantity = $quantity + (int)$v4;
+				$quantity = $quantity + (float)$v4;
 			}
 
 			$data['quantity'] = $quantity;
@@ -228,112 +228,6 @@ class Cart_model extends CI_Model
 		return $pData['code'];
 	}
 
-	// function get_AddCart($pData = null, $cart = null, $promoCart = null, $lang = null, $customer = null)
-	// {
-	// 	if (!$cart) {
-	// 		$customerId = isset($pData['customerId']) ? $pData['customerId'] : $this->uniqueCode(mt_rand(10000000, 99999999));
-	// 		$where = array('customer' => $customerId);
-	// 		$data = $this->db->get_where($this->tblCart, $where)->row_array();
-	// 		$data['code'] = md5($customerId);
-	// 		$data['customer'] = $customerId;
-	// 	} else {
-	// 		if (!IsNullOrEmptyString($promoCart)) {
-	// 			$this->db->set('promoCode', $promoCart); //value that used to update column
-	// 			$this->db->where('code', $cart); //which row want to upgrade
-	// 			$this->db->update($this->tblCart); //table name
-	// 		}
-	// 		$where = array('code' => $cart);
-	// 		$data = $this->db->get_where($this->tblCart, $where)->row_array();
-	// 	}
-
-	// 	if ($data && isset($data['products']) && $data['quantity']) {
-	// 		$dupliCatedProductId = false;
-
-	// 		$products = explode(',', $data['products']);
-	// 		$quantities = explode(',', $data['quantity']);
-
-	// 		// Update current record product & quantity
-	// 		foreach ($products as $k1 => $v1) {
-	// 			if (!$v1) continue;
-	// 			if ($v1 == $pData['productId']) {
-	// 				$quantities[$k1] = $pData['quantity'];
-	// 				$dupliCatedProductId = true;
-	// 			}
-	// 		}
-	// 		if (!$dupliCatedProductId) {
-	// 			$data['products'] = $data['products'] . $pData['productId'] . ',';
-	// 			$data['quantity'] = $data['quantity'] . $pData['quantity'] . ',';
-	// 		} else {
-	// 			// update quantity & product when productID duplicates on the products
-	// 			$data['products'] = '';
-	// 			$data['quantity'] = '';
-	// 			foreach ($quantities as $k2 => $v2) {
-	// 				if ($v2 == 0) unset($products[$k2]);
-	// 				if (!$v2) continue;
-	// 				$data['quantity'] = $data['quantity'] . $v2 . ',';
-	// 			}
-	// 			foreach ($products as $k4 => $v4) {
-	// 				if (!$v4) continue;
-	// 				$data['products'] = $data['products'] . $v4 . ',';
-	// 			}
-	// 		}
-	// 		$this->db->where($where);
-	// 		$this->db->update($this->tblCart, $data);
-	// 	} else {
-	// 		// Insert New cart when login
-	// 		$newData['products'] = isset($pData['productId']) ? $pData['productId'] . ',' : null;
-	// 		$newData['quantity'] = isset($pData['quantity']) ? $pData['quantity'] . ',' : null;
-	// 		$newData['code'] = $cart;
-	// 		$newData['customer'] = isset($pData['customerId']) ? $pData['customerId'] : $customer;
-
-	// 		$data = $this->db->get_where($this->tblCart, array('code' => $cart))->row_array();
-	// 		if ($data) {
-	// 			$this->db->where(array('code' => $cart))->update($this->tblCart, $newData);
-	// 		} else {
-	// 			$this->db->insert($this->tblCart, $newData);
-	// 			$id = $this->db->insert_id();
-	// 			$data = $this->db->get_where($this->tblCart, array('id' => $id))->row_array();
-	// 		}
-	// 		$products = explode(',', $data['products']);
-	// 		$quantities = explode(',', $data['quantity']);
-	// 	}
-
-	// 	$totals = $this->db->get($this->tblTotal)->result_array();
-
-	// 	// Get the whole products detail
-	// 	$data['products'] = array();
-	// 	$totalPrice  = 0;
-	// 	$curTotalPrice = 0;
-	// 	foreach ($products as $k3 => $v3) {
-	// 		if (!$v3) continue;
-	// 		$product = $this->getFullProductDetails($v3);
-	// 		$curTotalPrice = $product['price'] * (int)$quantities[$k3];
-	// 		$totalPrice  = $curTotalPrice + $totalPrice;
-	// 		$product['quantity'] = (int)$quantities[$k3];
-	// 		$product['subTotal'] = $product['total'] = $curTotalPrice;
-	// 		$product['displaySubTotal'] = $product['displayTotal'] = "USD" . number_format($curTotalPrice, 2);
-	// 		array_push($data['products'], $product);
-	// 	}
-
-	// 	// Calc whole quantity
-	// 	$quantity = 0;
-	// 	foreach ($quantities as $k4 => $v4) {
-	// 		if (!$v4) continue;
-	// 		$quantity = $quantity + (int)$v4;
-	// 	}
-
-	// 	$data['quantity'] = $quantity;
-	// 	$data['total'] = $data['subTotal'] = $totalPrice;
-	// 	$data['displayTotal'] = $data['displaySubTotal'] = "USD" . number_format($totalPrice, 2);
-	// 	$data['totals'] = $totals;
-	// 	$data['totals'][0]['value'] = number_format($curTotalPrice, 2);
-	// 	$data['totals'][1]['value'] = number_format($curTotalPrice, 2);
-
-	// 	$this->db->where($where)->update($this->tblCart, array('total' => $totalPrice, 'subTotal' => $totalPrice));
-
-	// 	return $data;
-	// }
-
 	function updateCartWithCustomerIDWhenLogin($customer_id, $existingToken)
 	{
 		$originRecord = $this->db->get_where($this->tblCart, array('customer' => $customer_id))->row_array();
@@ -356,18 +250,6 @@ class Cart_model extends CI_Model
 		else
 			return $rndNum;
 	}
-
-	// function get_UserCart($cart, $customer, $lang, $store)
-	// {
-	// 	$cart = $this->get_AddCart(null, $cart, null, $lang, $customer);
-	// 	return $cart;
-	// }
-
-	// function get_UserPromoCart($pData)
-	// {
-	// 	$cart = $this->get_AddCart(null, $pData['code'], $pData['promoCart'], $pData['lang']);
-	// 	return $cart;
-	// }
 
 	function updateCartPromo($pData)
 	{
